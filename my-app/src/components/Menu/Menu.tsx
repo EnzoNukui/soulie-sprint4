@@ -41,6 +41,13 @@ export default function Menu({ variante, aoNavegar }: MenuProps) {
               {link.nome}
             </NavLink>
           ))}
+          <NavLink
+            to="/app"
+            className="mt-2 rounded-xl bg-violet-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-violet-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
+            onClick={aoNavegar}
+          >
+            Acessar o app
+          </NavLink>
         </div>
       </nav>
     )

@@ -19,8 +19,6 @@ import imagemSoulie from '../../assets/avatar/imagem_soulie.png'
 import animacaoSoulie from '../../assets/avatar/soulie-animacao.mp4'
 import printPrototipo from '../../assets/produto/apresentacao/prototipo-soul-up.png'
 
-const linkMvp = 'https://soulieprototipo.vercel.app/jornada/encontro'
-
 const limitar = (valor: number, minimo: number, maximo: number) => Math.min(Math.max(valor, minimo), maximo)
 
 const interpolarCor = (inicio: number[], fim: number[], progresso: number) => {
@@ -113,13 +111,11 @@ export default function Home() {
     document.getElementById('desafio')?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  const abrirMvp = () => {
-    window.open(linkMvp, '_blank', 'noopener,noreferrer')
-  }
+  const abrirApp = () => navigate('/app')
 
   const progressoCor = limitar((progressoDestaque - 0.08) / 0.84, 0, 1)
   const corDestaque = interpolarCor([245, 243, 255], [46, 16, 101], progressoCor)
-  const saidaMvp = limitar((progressoDestaque - 0.34) / 0.22, 0, 1)
+  const saidaApp = limitar((progressoDestaque - 0.34) / 0.22, 0, 1)
   const entradaSobre = limitar((progressoDestaque - 0.46) / 0.24, 0, 1)
   const mostrarSobre = entradaSobre >= 0.5
 
@@ -335,9 +331,9 @@ export default function Home() {
             inert={mostrarSobre}
             className="absolute inset-0 flex items-center px-5 py-12 transition-opacity duration-200 motion-reduce:transition-none lg:px-8"
             style={{
-              opacity: 1 - saidaMvp,
+              opacity: 1 - saidaApp,
               pointerEvents: mostrarSobre ? 'none' : 'auto',
-              transform: `translate3d(0, ${-saidaMvp * 36}px, 0)`,
+              transform: `translate3d(0, ${-saidaApp * 36}px, 0)`,
             }}
           >
             <div className="mx-auto grid w-full max-w-7xl items-center gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:gap-12">
@@ -350,7 +346,7 @@ export default function Home() {
                   Pequenas ações podem virar hábitos que fazem diferença.
                 </p>
                 <div className="mt-8 flex justify-center lg:justify-start">
-                  <Botao texto="Conheça o MVP" onClick={abrirMvp} />
+                  <Botao texto="Acessar o app" onClick={abrirApp} />
                 </div>
               </div>
 
@@ -360,14 +356,14 @@ export default function Home() {
                   <div className="aspect-603/904 overflow-hidden rounded-[1.45rem] bg-violet-50">
                     <img
                       src={printPrototipo}
-                      alt="Tela inicial do protótipo da Soulie"
+                      alt="Tela do aplicativo Soulie"
                       className="h-full w-full object-cover object-top"
                     />
                   </div>
                 </div>
                 <img
                   src={avatarRadiante}
-                  alt="Soulie radiante apresentando o MVP"
+                  alt="Soulie radiante apresentando o app"
                   className="absolute -bottom-5 right-[2%] w-28 drop-shadow-[0_18px_26px_rgba(76,29,149,0.28)] sm:w-36 lg:right-[4%] lg:w-44"
                 />
               </div>

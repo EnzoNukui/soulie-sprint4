@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   BellRing,
   Gift,
@@ -17,8 +18,6 @@ import imagemComunidade from '../../assets/produto/cards/comunidade-sustentavel.
 import imagemMissao from '../../assets/produto/cards/missao-sustentavel.webp'
 import imagemProgresso from '../../assets/produto/cards/progresso-sustentavel.webp'
 import printPrototipo from '../../assets/produto/apresentacao/prototipo-soul-up.png'
-
-const linkMvp = 'https://soulieprototipo.vercel.app/jornada/encontro'
 
 const recursos = [
   {
@@ -114,6 +113,7 @@ const calcularCorFases = (progresso: number) => {
 }
 
 export default function Solucao() {
+  const navigate = useNavigate()
   const [faseAtiva, setFaseAtiva] = useState(0)
   const [progressoFases, setProgressoFases] = useState(0)
   const secaoFasesRef = useRef<HTMLElement>(null)
@@ -152,13 +152,7 @@ export default function Solucao() {
     }
   }, [])
 
-  const rolarParaRecursos = () => {
-    document.getElementById('recursos-solucao')?.scrollIntoView({ behavior: 'smooth' })
-  }
-
-  const abrirMvp = () => {
-    window.open(linkMvp, '_blank', 'noopener,noreferrer')
-  }
+  const abrirApp = () => navigate('/app')
 
   const fase = fases[faseAtiva]
   const corFundoFases = calcularCorFases(progressoFases)
@@ -181,7 +175,7 @@ export default function Solucao() {
               A Soulie transforma ações sustentáveis em missões simples, sociais e recompensadoras.
             </p>
             <div className="mt-8 flex justify-center lg:justify-start">
-              <Botao texto="Conheça a solução" onClick={rolarParaRecursos} />
+              <Botao texto="Conheça a solução" onClick={abrirApp} />
             </div>
           </div>
 
@@ -303,7 +297,7 @@ export default function Solucao() {
               variante="imagem"
               categoria="Ação"
               linkTexto="Saiba mais"
-              linkPara="#cta-mvp"
+              linkPara="#cta-app"
             />
             <Card
               titulo="Comunidade que inspira"
@@ -313,7 +307,7 @@ export default function Solucao() {
               variante="imagem"
               categoria="Conexão"
               linkTexto="Saiba mais"
-              linkPara="#cta-mvp"
+              linkPara="#cta-app"
             />
             <Card
               titulo="Progresso visível"
@@ -323,27 +317,27 @@ export default function Solucao() {
               variante="imagem"
               categoria="Evolução"
               linkTexto="Saiba mais"
-              linkPara="#cta-mvp"
+              linkPara="#cta-app"
             />
           </div>
         </div>
       </section>
 
-      <section id="cta-mvp" className="bg-white px-5 pb-20 pt-0 sm:pb-24 lg:px-8 lg:pb-28">
+      <section id="cta-app" className="bg-white px-5 pb-20 pt-0 sm:pb-24 lg:px-8 lg:pb-28">
         <div className="relative mx-auto grid max-w-7xl items-center overflow-hidden rounded-4xl bg-[#1c0b3e] text-white shadow-[0_28px_70px_-30px_rgba(46,16,101,0.75)] lg:min-h-104 lg:grid-cols-[0.9fr_1.1fr]">
           <div aria-hidden="true" className="absolute -left-24 -top-28 h-80 w-80 rounded-full bg-violet-600/20 blur-3xl" />
           <div aria-hidden="true" className="absolute -bottom-36 right-8 h-96 w-96 rounded-full bg-fuchsia-500/15 blur-3xl" />
 
           <div className="relative z-20 px-7 pb-4 pt-12 text-center sm:px-12 sm:pt-14 lg:px-16 lg:py-16 lg:text-left">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-violet-300">Experimente a jornada</p>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-violet-300">Conheça o app</p>
             <h2 className="mx-auto mt-4 max-w-xl text-4xl font-black tracking-[-0.04em] sm:text-5xl lg:mx-0">
-              Sua primeira missão já está esperando.
+              Sua jornada sustentável começa no app.
             </h2>
             <p className="mx-auto mt-5 max-w-md text-base leading-7 text-violet-100/80 lg:mx-0">
-              Conheça a jornada e transforme intenção em impacto.
+              Explore missões, acompanhe seu progresso e descubra como pequenas ações se tornam hábitos.
             </p>
             <div className="mt-8 flex justify-center lg:justify-start">
-              <Botao texto="Acessar o MVP" variante="claro" onClick={abrirMvp} />
+              <Botao texto="Acessar o app" variante="claro" onClick={abrirApp} />
             </div>
           </div>
 

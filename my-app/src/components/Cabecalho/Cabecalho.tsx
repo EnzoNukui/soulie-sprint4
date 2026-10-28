@@ -35,6 +35,13 @@ export default function Cabecalho() {
 
         <Menu variante="desktop" />
 
+        <NavLink
+          to="/app"
+          className="ml-auto hidden rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-violet-700 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 min-[992px]:inline-flex"
+        >
+          Acessar o app
+        </NavLink>
+
         <button
           ref={botaoMenuRef}
           type="button"
