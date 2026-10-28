@@ -43,19 +43,18 @@ export default function CardComunidade({
           {comunidade.nome}
         </button>
         <p className="mt-1 text-sm text-zinc-600">Um espaço para trocar ideias sobre {comunidade.tema.toLowerCase()}.</p>
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+        {participacao && <span className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-800"><Check aria-hidden="true" className="h-4 w-4" /> Você participa</span>}
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <button type="button" onClick={abrir} className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl border border-violet-200 bg-violet-50 px-3 py-2 text-xs font-bold text-violet-800 transition hover:bg-violet-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
+            Ver comunidade <ArrowRight aria-hidden="true" className="h-3.5 w-3.5" />
+          </button>
           {participacao ? (
-            <>
-              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-800">
-                <Check aria-hidden="true" className="h-4 w-4" /> Você participa
-              </span>
-              <button type="button" onClick={sair} disabled={saindo} className="rounded-lg px-3 py-2 text-xs font-semibold text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 disabled:opacity-50">
-                {saindo ? 'Saindo...' : 'Sair'}
-              </button>
-            </>
+            <button type="button" onClick={sair} disabled={saindo} className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl border border-zinc-200 px-3 py-2 text-xs font-semibold text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 disabled:opacity-50">
+              {saindo ? 'Saindo...' : 'Sair da comunidade'}
+            </button>
           ) : (
-            <button type="button" onClick={entrar} disabled={entrando} className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-violet-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 disabled:cursor-wait disabled:opacity-60">
-              {entrando ? 'Entrando...' : 'Participar'} <ArrowRight aria-hidden="true" className="h-4 w-4" />
+            <button type="button" onClick={entrar} disabled={entrando} className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl bg-violet-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-violet-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 disabled:cursor-wait disabled:opacity-60">
+              {entrando ? 'Entrando...' : 'Participar'} <ArrowRight aria-hidden="true" className="h-3.5 w-3.5" />
             </button>
           )}
         </div>

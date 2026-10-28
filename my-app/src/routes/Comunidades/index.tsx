@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { ArrowRight, CalendarDays, Check, Plus, Search, X } from 'lucide-react'
-import { useOutletContext } from 'react-router-dom'
+import { Check, Plus, Search, X } from 'lucide-react'
+import { useNavigate, useOutletContext } from 'react-router-dom'
 import avatarRadiante from '../../assets/avatar/expressoes/avatar_radiante.png'
 import avatarSorridente from '../../assets/avatar/expressoes/avatar_sorridente.png'
 import soulieApontando from '../../assets/avatar/integrantes/soulie-apontando.png'
@@ -11,11 +11,6 @@ import ErrorState from '../../components/ErrorState/ErrorState'
 import LoadingState from '../../components/LoadingState/LoadingState'
 import { comunidadeService } from '../../services/comunidadeService'
 import type { Comunidade, Usuario, UsuarioComunidade } from '../../types/api'
-
-type EstadoDetalhe =
-  | { status: 'idle' | 'loading' }
-  | { status: 'success'; data: Comunidade }
-  | { status: 'error'; message: string }
 
 const capasComunidade = {
   natureza: 'https://images.unsplash.com/photo-1781785161788-a906202dba8f?auto=format&fit=crop&w=1200&q=80',
@@ -60,28 +55,20 @@ function dataLocal() {
   return new Date(agora.getTime() - deslocamento).toISOString().slice(0, 10)
 }
 
-function formatarData(data: string) {
-  const valor = new Date(data + 'T00:00:00')
-  if (Number.isNaN(valor.getTime())) return data
-  return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium' }).format(valor)
-}
-
 function mensagemErro(erro: unknown, padrao: string) {
   return erro instanceof Error ? erro.message : padrao
 }
 
 export default function Comunidades() {
+  const navigate = useNavigate()
   const usuario = useOutletContext<Usuario>()
   const [comunidades, setComunidades] = useState<Comunidade[]>([])
   const [minhasParticipacoes, setMinhasParticipacoes] = useState<UsuarioComunidade[]>([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
   const [tentativa, setTentativa] = useState(0)
-  const [tentativaDetalhe, setTentativaDetalhe] = useState(0)
   const [busca, setBusca] = useState('')
   const [temaSelecionado, setTemaSelecionado] = useState('Todos')
-  const [idComunidadeSelecionada, setIdComunidadeSelecionada] = useState<number | null>(null)
-  const [detalhe, setDetalhe] = useState<EstadoDetalhe>({ status: 'idle' })
   const [abrirCriacao, setAbrirCriacao] = useState(false)
   const [criando, setCriando] = useState(false)
   const [nome, setNome] = useState('')
@@ -119,21 +106,6 @@ export default function Comunidades() {
     void carregarComunidades()
     return () => controller.abort()
   }, [tentativa, usuario.idUsuario])
-
-  useEffect(() => {
-    if (idComunidadeSelecionada === null) return
-    const controller = new AbortController()
-
-    comunidadeService
-      .buscarPorId(idComunidadeSelecionada, controller.signal)
-      .then((data) => setDetalhe({ status: 'success', data }))
-      .catch((erroDetalhe: unknown) => {
-        if (controller.signal.aborted) return
-        setDetalhe({ status: 'error', message: mensagemErro(erroDetalhe, 'Não foi possível carregar os detalhes desta comunidade.') })
-      })
-
-    return () => controller.abort()
-  }, [idComunidadeSelecionada, tentativaDetalhe])
 
   const participacoesPorComunidade = useMemo(
     () => new Map(minhasParticipacoes.map((participacao) => [participacao.idComunidade, participacao])),
@@ -202,11 +174,13 @@ export default function Comunidades() {
     setAviso('')
 
     try {
-      const participacao = await comunidadeService.participar({
+      const dadosParticipacao = {
         idUsuario: usuario.idUsuario,
         idComunidade: comunidade.idComunidade,
         dataIngresso: dataLocal(),
-      })
+      }
+      const resposta = await comunidadeService.participar(dadosParticipacao)
+      const participacao = resposta ?? dadosParticipacao
       setMinhasParticipacoes((atuais) => [
         ...atuais.filter((item) => item.idComunidade !== participacao.idComunidade),
         participacao,
@@ -265,13 +239,7 @@ export default function Comunidades() {
   }
 
   function abrirDetalhes(idComunidade: number) {
-    setDetalhe({ status: 'loading' })
-    setIdComunidadeSelecionada(idComunidade)
-  }
-
-  function fecharDetalhes() {
-    setIdComunidadeSelecionada(null)
-    setDetalhe({ status: 'idle' })
+    navigate(`/app/comunidades/${idComunidade}`)
   }
 
   function tentarCarregarNovamente() {
@@ -424,51 +392,6 @@ export default function Comunidades() {
           )}
         </div>
       </section>
-
-      {idComunidadeSelecionada !== null && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-zinc-950/40 p-4" role="presentation" onMouseDown={(event) => {
-          if (event.target === event.currentTarget) fecharDetalhes()
-        }}>
-          <section role="dialog" aria-modal="true" aria-labelledby="titulo-detalhe-comunidade" className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-violet-100 bg-white p-6 shadow-2xl sm:p-8">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-violet-700">Comunidade Soulie</p>
-                {detalhe.status === 'success' && <h2 id="titulo-detalhe-comunidade" className="mt-2 text-2xl font-black text-zinc-950">{detalhe.data.nome}</h2>}
-                {detalhe.status !== 'success' && <h2 id="titulo-detalhe-comunidade" className="sr-only">Detalhes da comunidade</h2>}
-              </div>
-              <button type="button" onClick={fecharDetalhes} aria-label="Fechar detalhes" className="rounded-lg p-2 text-zinc-500 transition hover:bg-violet-50 hover:text-violet-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
-                <X aria-hidden="true" className="h-5 w-5" />
-              </button>
-            </div>
-            {detalhe.status === 'loading' && <div className="mt-5"><LoadingState mensagem="Carregando comunidade..." /></div>}
-            {detalhe.status === 'error' && <div className="mt-5"><ErrorState mensagem={detalhe.message} tentarNovamente={() => { setDetalhe({ status: 'loading' }); setTentativaDetalhe((valor) => valor + 1) }} /></div>}
-            {detalhe.status === 'success' && (
-              <>
-                <img src={capaDaComunidade(detalhe.data)} alt="" referrerPolicy="no-referrer" onError={(event) => { event.currentTarget.style.visibility = 'hidden' }} className="mt-5 h-44 w-full rounded-2xl bg-violet-100 object-cover" />
-                <p className="mt-4 inline-flex rounded-full bg-violet-50 px-3 py-1.5 text-xs font-semibold text-violet-800">{detalhe.data.tema}</p>
-                <p className="mt-4 leading-6 text-zinc-600">Um espaço para trocar ideias, compartilhar experiências e descobrir novas ações sobre {detalhe.data.tema.toLowerCase()}.</p>
-                {participacoesPorComunidade.get(detalhe.data.idComunidade) && (
-                  <p className="mt-4 inline-flex items-center gap-2 text-sm text-zinc-500">
-                    <CalendarDays aria-hidden="true" className="h-4 w-4" />
-                    Você participa desde {formatarData(participacoesPorComunidade.get(detalhe.data.idComunidade)!.dataIngresso)}.
-                  </p>
-                )}
-                <div className="mt-6">
-                  {participacoesPorComunidade.has(detalhe.data.idComunidade) ? (
-                    <button type="button" onClick={() => void sair(detalhe.data)} disabled={idSaindo !== null} className="min-h-11 rounded-xl border border-zinc-300 px-5 py-2.5 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50 disabled:opacity-50">
-                      {idSaindo === detalhe.data.idComunidade ? 'Saindo...' : 'Sair da comunidade'}
-                    </button>
-                  ) : (
-                    <button type="button" onClick={() => void participar(detalhe.data)} disabled={idEntrando !== null} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-violet-700 disabled:opacity-50">
-                      {idEntrando === detalhe.data.idComunidade ? 'Entrando...' : 'Participar da comunidade'} <ArrowRight aria-hidden="true" className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-              </>
-            )}
-          </section>
-        </div>
-      )}
 
       {abrirCriacao && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-zinc-950/40 p-4" role="presentation" onMouseDown={(event) => {

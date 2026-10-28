@@ -4,6 +4,7 @@ import LayoutApp from "../components/LayoutApp/LayoutApp";
 import AppSoulie from "./App";
 import AcessoApp from "./AcessoApp";
 import Comunidades from "./Comunidades";
+import ComunidadeDetalhe from "./ComunidadeDetalhe";
 import Contato from "./Contato";
 import Error from "./Error";
 import Faq from "./Faq";
@@ -70,6 +71,10 @@ const router = createBrowserRouter([
       {
         path: "/app/comunidades",
         element: <Comunidades />,
+      },
+      {
+        path: "/app/comunidades/:id",
+        element: <ComunidadeDetalhe />,
       },
     ],
   },
