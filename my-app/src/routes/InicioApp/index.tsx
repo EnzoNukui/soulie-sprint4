@@ -392,7 +392,7 @@ export default function InicioApp() {
                     <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
                       <h3 className="font-bold text-zinc-950">{autores[postagem.idUsuario] ?? 'Pessoa da comunidade'}</h3>
                       <span className="hidden text-zinc-400 sm:inline">em</span>
-                      <Link to="/app/comunidades" className="text-sm font-medium text-violet-700 hover:text-violet-900">{nomesComunidades.get(postagem.idComunidade) ?? `Comunidade ${postagem.idComunidade}`}</Link>
+                      <Link to={`/app/comunidades/${postagem.idComunidade}`} className="text-sm font-medium text-violet-700 hover:text-violet-900">{nomesComunidades.get(postagem.idComunidade) ?? `Comunidade ${postagem.idComunidade}`}</Link>
                     </div>
                     <time dateTime={postagem.dataPostagem} className="mt-1 block text-xs text-zinc-500">{formatarData(postagem.dataPostagem)}</time>
                     <h4 className="mt-3 font-semibold text-zinc-900">{postagem.titulo}</h4>

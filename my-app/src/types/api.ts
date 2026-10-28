@@ -67,21 +67,6 @@ export type CriarAtividadeRequest = Pick<Atividade, 'idUsuario' | 'idMissao'> & 
 }
 export type AtualizarAtividadeRequest = Pick<Atividade, 'idUsuario' | 'idMissao' | 'observacao'>
 
-export interface Conquista {
-  idConquista: number
-  nome: string
-  descricao: string
-}
-
-export type CriarConquistaRequest = Omit<Conquista, 'idConquista'>
-export type AtualizarConquistaRequest = CriarConquistaRequest
-
-export interface UsuarioConquista {
-  idUsuario: number
-  idConquista: number
-  dataConquista: LocalDate
-}
-
 export interface Comunidade {
   idComunidade: number
   nome: string
