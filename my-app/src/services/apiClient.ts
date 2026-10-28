@@ -27,6 +27,7 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}): Promi
     throw new Error('A URL da API não foi configurada. Defina VITE_API_URL no ambiente.')
   }
 
+  const method = (init.method ?? 'GET').toUpperCase()
   const headers = new Headers(init.headers)
   headers.set('Accept', 'application/json')
   if (init.body && !headers.has('Content-Type')) {
@@ -38,6 +39,7 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}): Promi
     response = await fetch(`${API_URL}${path.startsWith('/') ? path : `/${path}`}`, {
       ...init,
       headers,
+      ...(method === 'GET' ? { cache: init.cache ?? 'no-store' } : {}),
     })
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') throw error

@@ -42,6 +42,14 @@ function ehNaoEncontrado(erro: unknown) {
   return typeof erro === 'object' && erro !== null && 'status' in erro && erro.status === 404
 }
 
+async function executarConsulta<T>(consulta: () => Promise<T>): Promise<PromiseSettledResult<T>> {
+  try {
+    return { status: 'fulfilled', value: await consulta() }
+  } catch (reason) {
+    return { status: 'rejected', reason }
+  }
+}
+
 export default function InicioApp() {
   const navigate = useNavigate()
   const usuario = useOutletContext<Usuario>()
@@ -74,17 +82,19 @@ export default function InicioApp() {
     const controller = new AbortController()
 
     async function carregarInicio() {
-      const resultados = await Promise.allSettled([
-        streakService.buscarPorUsuario(usuario.idUsuario, controller.signal),
-        avatarService.buscarPorUsuario(usuario.idUsuario, controller.signal),
-        missaoService.listarParticipacoesDoUsuario(usuario.idUsuario, controller.signal),
-        comunidadeService.listar(controller.signal),
-        comunidadeService.listarDoUsuario(usuario.idUsuario, controller.signal),
-        postagemService.listar(controller.signal),
-      ])
+      const resultadoStreak = await executarConsulta(() => streakService.buscarPorUsuario(usuario.idUsuario, controller.signal))
+      if (controller.signal.aborted) return
+      const resultadoAvatar = await executarConsulta(() => avatarService.buscarPorUsuario(usuario.idUsuario, controller.signal))
+      if (controller.signal.aborted) return
+      const resultadoJornada = await executarConsulta(() => missaoService.listarParticipacoesDoUsuario(usuario.idUsuario, controller.signal))
+      if (controller.signal.aborted) return
+      const resultadoComunidades = await executarConsulta(() => comunidadeService.listar(controller.signal))
+      if (controller.signal.aborted) return
+      const resultadoMinhasComunidades = await executarConsulta(() => comunidadeService.listarDoUsuario(usuario.idUsuario, controller.signal))
+      if (controller.signal.aborted) return
+      const resultadoFeed = await executarConsulta(() => postagemService.listar(controller.signal))
       if (controller.signal.aborted) return
 
-      const [resultadoStreak, resultadoAvatar, resultadoJornada, resultadoComunidades, resultadoMinhasComunidades, resultadoFeed] = resultados
       const errosIndicadores: string[] = []
 
       if (resultadoStreak.status === 'fulfilled') setStreak(resultadoStreak.value)
@@ -129,17 +139,14 @@ export default function InicioApp() {
 
         const idsAutores = [...new Set(recentes.map((postagem) => postagem.idUsuario))]
           .filter((idUsuario) => idUsuario !== usuario.idUsuario)
-        const respostasAutores = await Promise.allSettled(
-          idsAutores.map((idUsuario) => usuarioService.buscarPorId(idUsuario, controller.signal)),
-        )
-        if (controller.signal.aborted) return
-
         const autoresCarregados: Record<number, string> = { [usuario.idUsuario]: usuario.nomeUsuario }
-        respostasAutores.forEach((resultado, indice) => {
+        for (const idUsuario of idsAutores) {
+          const resultado = await executarConsulta(() => usuarioService.buscarPorId(idUsuario, controller.signal))
+          if (controller.signal.aborted) return
           if (resultado.status === 'fulfilled') {
-            autoresCarregados[idsAutores[indice]] = resultado.value.nomeUsuario
+            autoresCarregados[idUsuario] = resultado.value.nomeUsuario
           }
-        })
+        }
         setAutores(autoresCarregados)
       } else {
         setPostagens([])
