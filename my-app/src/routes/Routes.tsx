@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 import App from "../App";
+import AppSoulie from "./App";
 import Contato from "./Contato";
 import Error from "./Error";
 import Faq from "./Faq";
@@ -41,6 +42,10 @@ const router = createBrowserRouter([
       {
         path: "/faq",
         element: <Faq />,
+      },
+      {
+        path: "/app",
+        element: <AppSoulie />,
       },
     ],
   },
