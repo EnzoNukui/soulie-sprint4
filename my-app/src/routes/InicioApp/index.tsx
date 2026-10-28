@@ -84,17 +84,21 @@ export default function InicioApp() {
     const controller = new AbortController()
 
     async function carregarInicio() {
-      const resultadoStreak = await executarConsulta(() => streakService.buscarPorUsuario(usuario.idUsuario, controller.signal))
-      if (controller.signal.aborted) return
-      const resultadoAvatar = await executarConsulta(() => avatarService.buscarPorUsuario(usuario.idUsuario, controller.signal))
-      if (controller.signal.aborted) return
-      const resultadoJornada = await executarConsulta(() => missaoService.listarParticipacoesDoUsuario(usuario.idUsuario, controller.signal))
-      if (controller.signal.aborted) return
-      const resultadoComunidades = await executarConsulta(() => comunidadeService.listar(controller.signal))
-      if (controller.signal.aborted) return
-      const resultadoMinhasComunidades = await executarConsulta(() => comunidadeService.listarDoUsuario(usuario.idUsuario, controller.signal))
-      if (controller.signal.aborted) return
-      const resultadoFeed = await executarConsulta(() => postagemService.listar(controller.signal))
+      const [
+        resultadoStreak,
+        resultadoAvatar,
+        resultadoJornada,
+        resultadoComunidades,
+        resultadoMinhasComunidades,
+        resultadoFeed,
+      ] = await Promise.all([
+        executarConsulta(() => streakService.buscarPorUsuario(usuario.idUsuario, controller.signal)),
+        executarConsulta(() => avatarService.buscarPorUsuario(usuario.idUsuario, controller.signal)),
+        executarConsulta(() => missaoService.listarParticipacoesDoUsuario(usuario.idUsuario, controller.signal)),
+        executarConsulta(() => comunidadeService.listar(controller.signal)),
+        executarConsulta(() => comunidadeService.listarDoUsuario(usuario.idUsuario, controller.signal)),
+        executarConsulta(() => postagemService.listar(controller.signal)),
+      ])
       if (controller.signal.aborted) return
 
       const errosIndicadores: string[] = []
@@ -142,20 +146,26 @@ export default function InicioApp() {
         const idsAutores = [...new Set(recentes.map((postagem) => postagem.idUsuario))]
           .filter((idUsuario) => idUsuario !== usuario.idUsuario)
         const autoresCarregados: Record<number, string> = { [usuario.idUsuario]: usuario.nomeUsuario }
+        setAutores(autoresCarregados)
+        setErroFeed('')
+        setCarregando(false)
+
+        const autoresAtualizados = { ...autoresCarregados }
         for (const idUsuario of idsAutores) {
-          const resultado = await executarConsulta(() => usuarioService.buscarPorId(idUsuario, controller.signal))
+          const resultado = await executarConsulta(() =>
+            usuarioService.buscarPorId(idUsuario, controller.signal),
+          )
           if (controller.signal.aborted) return
           if (resultado.status === 'fulfilled') {
-            autoresCarregados[idUsuario] = resultado.value.nomeUsuario
+            autoresAtualizados[idUsuario] = resultado.value.nomeUsuario
+            setAutores({ ...autoresAtualizados })
           }
         }
-        setAutores(autoresCarregados)
       } else {
         setPostagens([])
         setErroFeed(textoDeErro(resultadoFeed.reason, 'Não foi possível carregar as publicações.'))
+        setCarregando(false)
       }
-
-      setCarregando(false)
     }
 
     void carregarInicio()
