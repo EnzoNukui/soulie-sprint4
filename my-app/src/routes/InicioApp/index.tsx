@@ -4,6 +4,7 @@ import { Link, useNavigate, useOutletContext } from 'react-router-dom'
 import avatarDuvida from '../../assets/avatar/expressoes/avatar_duvida.png'
 import avatarRadiante from '../../assets/avatar/expressoes/avatar_radiante.png'
 import avatarSorridente from '../../assets/avatar/expressoes/avatar_sorridente.png'
+import AcoesPublicacao from '../../components/AcoesPublicacao/AcoesPublicacao'
 import AcaoGuiadaSoulie from '../../components/AcaoGuiadaSoulie/AcaoGuiadaSoulie'
 import EmptyState from '../../components/EmptyState/EmptyState'
 import ErrorState from '../../components/ErrorState/ErrorState'
@@ -73,6 +74,7 @@ export default function InicioApp() {
   const [publicando, setPublicando] = useState(false)
   const [erroPublicacao, setErroPublicacao] = useState('')
   const [publicacaoConcluida, setPublicacaoConcluida] = useState(false)
+  const [avisoAcaoPostagem, setAvisoAcaoPostagem] = useState('')
 
   useEffect(() => {
     document.title = 'Soulie | Início'
@@ -248,6 +250,26 @@ export default function InicioApp() {
     }
   }
 
+  async function atualizarPublicacao(postagem: Postagem, dados: Pick<Postagem, 'titulo' | 'conteudo'>) {
+    const postagemAtualizada = await postagemService.atualizar(postagem.idPostagem, {
+      idUsuario: usuario.idUsuario,
+      idComunidade: postagem.idComunidade,
+      titulo: dados.titulo,
+      conteudo: dados.conteudo,
+      dataPostagem: postagem.dataPostagem,
+    })
+    setPostagens((atuais) => atuais.map((item) =>
+      item.idPostagem === postagemAtualizada.idPostagem ? postagemAtualizada : item,
+    ))
+    setAvisoAcaoPostagem('Sua publicação foi atualizada.')
+  }
+
+  async function excluirPublicacao(postagem: Postagem) {
+    await postagemService.excluir(postagem.idPostagem)
+    setPostagens((atuais) => atuais.filter((item) => item.idPostagem !== postagem.idPostagem))
+    setAvisoAcaoPostagem('Sua publicação foi excluída.')
+  }
+
   function irParaPublicacao() {
     document.getElementById('nova-publicacao')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     document.getElementById('titulo-publicacao')?.focus({ preventScroll: true })
@@ -260,7 +282,7 @@ export default function InicioApp() {
   return (
     <main className="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-10">
       <header className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
-        <div>
+        <div className="pr-20 lg:pr-0">
           <h1 className="text-3xl font-black tracking-tight text-zinc-950 sm:text-4xl">Olá, {nomeCurto(usuario.nomeUsuario)}<span aria-hidden="true">!</span></h1>
           <p className="mt-2 max-w-2xl text-base leading-7 text-zinc-600">Acompanhe sua jornada e veja o que a comunidade está fazendo.</p>
         </div>
@@ -335,6 +357,8 @@ export default function InicioApp() {
           {!minhasComunidades.length && !erroComunidades && <p className="mt-3 text-sm text-zinc-600">Para publicar, primeiro participe de uma comunidade. <Link to="/app/comunidades" className="font-bold text-violet-700 underline underline-offset-2">Encontrar comunidades</Link></p>}
         </form>
 
+        {avisoAcaoPostagem && <p role="status" className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">{avisoAcaoPostagem}</p>}
+
         <div id="feed-publicacoes" role="tabpanel" aria-label={abaFeed === 'para-voce' ? 'Publicações para você' : 'Publicações das suas comunidades'} tabIndex={0}>
         {erroFeed ? (
           <div className="mt-4"><ErrorState mensagem={erroFeed} tentarNovamente={tentarNovamente} /></div>
@@ -349,11 +373,12 @@ export default function InicioApp() {
           <div className="mt-4 space-y-3" role="tabpanel">
             {postagensVisiveis.map((postagem) => (
               <article key={postagem.idPostagem} className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm sm:px-6">
-                <div className="flex items-start gap-3">
-                  <span aria-hidden="true" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-violet-100 text-sm font-black text-violet-700">
-                    {(autores[postagem.idUsuario] ?? 'S').split(/\s+/).slice(0, 2).map((parte) => parte[0]).join('').toUpperCase()}
-                  </span>
-                  <div className="min-w-0 flex-1">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+                  <div className="flex min-w-0 flex-1 items-start gap-3">
+                    <span aria-hidden="true" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-violet-100 text-sm font-black text-violet-700">
+                      {(autores[postagem.idUsuario] ?? 'S').split(/\s+/).slice(0, 2).map((parte) => parte[0]).join('').toUpperCase()}
+                    </span>
+                    <div className="min-w-0 flex-1">
                     <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
                       <h3 className="font-bold text-zinc-950">{autores[postagem.idUsuario] ?? 'Pessoa da comunidade'}</h3>
                       <span className="hidden text-zinc-400 sm:inline">em</span>
@@ -362,8 +387,13 @@ export default function InicioApp() {
                     <time dateTime={postagem.dataPostagem} className="mt-1 block text-xs text-zinc-500">{formatarData(postagem.dataPostagem)}</time>
                     <h4 className="mt-3 font-semibold text-zinc-900">{postagem.titulo}</h4>
                     <p className="mt-1 whitespace-pre-line text-sm leading-6 text-zinc-700">{postagem.conteudo}</p>
+                    </div>
                   </div>
-                  <MessageCircle aria-hidden="true" className="hidden h-5 w-5 shrink-0 text-violet-400 sm:block" />
+                  {postagem.idUsuario === usuario.idUsuario ? (
+                    <AcoesPublicacao postagem={postagem} aoAtualizar={atualizarPublicacao} aoExcluir={excluirPublicacao} />
+                  ) : (
+                    <MessageCircle aria-hidden="true" className="hidden h-5 w-5 shrink-0 text-violet-400 sm:block" />
+                  )}
                 </div>
               </article>
             ))}

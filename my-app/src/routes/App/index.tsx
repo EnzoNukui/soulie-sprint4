@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { ArrowRight, CalendarDays, Check, CircleCheck, Plus, Target, X } from 'lucide-react'
+import { ArrowRight, CalendarDays, Check, CircleCheck, Flame, Plus, Target, X } from 'lucide-react'
 import { useOutletContext } from 'react-router-dom'
 import avatarRadiante from '../../assets/avatar/expressoes/avatar_radiante.png'
 import avatarSorridente from '../../assets/avatar/expressoes/avatar_sorridente.png'
@@ -7,8 +7,11 @@ import AcaoGuiadaSoulie from '../../components/AcaoGuiadaSoulie/AcaoGuiadaSoulie
 import EmptyState from '../../components/EmptyState/EmptyState'
 import ErrorState from '../../components/ErrorState/ErrorState'
 import LoadingState from '../../components/LoadingState/LoadingState'
+import ProgressoMissao from '../../components/ProgressoMissao/ProgressoMissao'
+import { atividadeService } from '../../services/atividadeService'
 import { missaoService } from '../../services/missaoService'
-import type { Missao, Usuario, UsuarioMissao } from '../../types/api'
+import { streakService } from '../../services/streakService'
+import type { Atividade, Missao, Streak, Usuario, UsuarioMissao } from '../../types/api'
 
 type FiltroMissoes = 'todas' | 'disponiveis' | 'andamento' | 'concluidas'
 
@@ -25,6 +28,17 @@ function dataLocal() {
   return new Date(agora.getTime() - deslocamento).toISOString().slice(0, 10)
 }
 
+function dataAtualDeSaoPaulo() {
+  const partes = new Intl.DateTimeFormat('en', {
+    day: '2-digit',
+    month: '2-digit',
+    timeZone: 'America/Sao_Paulo',
+    year: 'numeric',
+  }).formatToParts(new Date())
+  const valores = Object.fromEntries(partes.map((parte) => [parte.type, parte.value]))
+  return `${valores.year}-${valores.month}-${valores.day}`
+}
+
 function formatarData(data: string) {
   const valor = new Date(data + 'T00:00:00')
   if (Number.isNaN(valor.getTime())) return data
@@ -39,6 +53,7 @@ export default function MissoesApp() {
   const usuario = useOutletContext<Usuario>()
   const [missoes, setMissoes] = useState<Missao[]>([])
   const [participacoes, setParticipacoes] = useState<UsuarioMissao[]>([])
+  const [atividades, setAtividades] = useState<Atividade[]>([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
   const [tentativa, setTentativa] = useState(0)
@@ -49,6 +64,10 @@ export default function MissoesApp() {
   const [abrirCriacao, setAbrirCriacao] = useState(false)
   const [criando, setCriando] = useState(false)
   const [entrandoNaMissao, setEntrandoNaMissao] = useState<number | null>(null)
+  const [registrandoAtividade, setRegistrandoAtividade] = useState<number | null>(null)
+  const [streakAtualizada, setStreakAtualizada] = useState<Streak | null>(null)
+  const [erroRegistro, setErroRegistro] = useState('')
+  const [avisoRegistro, setAvisoRegistro] = useState('')
   const [erroAcao, setErroAcao] = useState('')
   const [aviso, setAviso] = useState('')
   const [nome, setNome] = useState('')
@@ -65,14 +84,16 @@ export default function MissoesApp() {
 
     async function carregarMissoes() {
       try {
-        const lista = await missaoService.listar(controller.signal)
-        if (controller.signal.aborted) return
-
-        const listaParticipacoes = await missaoService.listarParticipacoesDoUsuario(usuario.idUsuario, controller.signal)
+        const [lista, listaParticipacoes, listaAtividades] = await Promise.all([
+          missaoService.listar(controller.signal),
+          missaoService.listarParticipacoesDoUsuario(usuario.idUsuario, controller.signal),
+          atividadeService.listarDoUsuario(usuario.idUsuario, controller.signal),
+        ])
         if (controller.signal.aborted) return
 
         setMissoes(lista)
         setParticipacoes(listaParticipacoes)
+        setAtividades(listaAtividades)
       } catch (erroCarregamento) {
         if (controller.signal.aborted) return
         setErro(mensagemErro(erroCarregamento, 'Não foi possível carregar as missões.'))
@@ -110,6 +131,15 @@ export default function MissoesApp() {
     () => new Map(participacoes.map((participacao) => [participacao.idMissao, participacao])),
     [participacoes],
   )
+  const diasAtividadePorMissao = useMemo(() => {
+    const datas = new Map<number, Set<string>>()
+    for (const atividade of atividades) {
+      const datasDaMissao = datas.get(atividade.idMissao) ?? new Set<string>()
+      datasDaMissao.add(atividade.dataRegistro)
+      datas.set(atividade.idMissao, datasDaMissao)
+    }
+    return datas
+  }, [atividades])
   const missoesDisponiveis = missoes.filter((missao) => !participacoesPorMissao.has(missao.idMissao))
   const missoesEmAndamento = participacoes.filter((participacao) => participacao.status === 'EM_ANDAMENTO').length
   const missoesConcluidas = participacoes.filter((participacao) => participacao.status === 'CONCLUIDA').length
@@ -151,6 +181,70 @@ export default function MissoesApp() {
     }
   }
 
+  async function confirmarAcaoDoDia(missao: Missao) {
+    setRegistrandoAtividade(missao.idMissao)
+    setErroRegistro('')
+    setAvisoRegistro('')
+    setStreakAtualizada(null)
+
+    try {
+      const atividade = await atividadeService.registrar({
+        idUsuario: usuario.idUsuario,
+        idMissao: missao.idMissao,
+        observacao: 'Ação diária confirmada pelo usuário.',
+      })
+      setAtividades((atuais) => [...atuais.filter((item) => item.idRegistro !== atividade.idRegistro), atividade])
+      setAvisoRegistro('Ação de hoje confirmada. Seu progresso foi atualizado.')
+
+      const [participacaoResultado, streakResultado] = await Promise.allSettled([
+        missaoService.buscarParticipacao(usuario.idUsuario, missao.idMissao),
+        streakService.buscarPorUsuario(usuario.idUsuario),
+      ])
+
+      const errosAtualizacao: string[] = []
+      if (participacaoResultado.status === 'fulfilled') {
+        const participacaoAtualizada = participacaoResultado.value
+        setParticipacoes((atuais) => [
+          ...atuais.filter((item) => item.idMissao !== participacaoAtualizada.idMissao),
+          participacaoAtualizada,
+        ])
+      } else errosAtualizacao.push('o status da missão')
+
+      if (streakResultado.status === 'fulfilled') {
+        setStreakAtualizada(streakResultado.value)
+      } else errosAtualizacao.push('a streak')
+      if (errosAtualizacao.length > 0) {
+        setErroRegistro(`A ação foi salva, mas não conseguimos atualizar ${errosAtualizacao.join(' e ')} agora. Os dados serão consultados novamente ao abrir esta tela.`)
+      }
+    } catch (erroAtividade) {
+      try {
+        const atividadesAtualizadas = await atividadeService.listarDoUsuario(usuario.idUsuario)
+        setAtividades(atividadesAtualizadas)
+        if (atividadesAtualizadas.some((item) => item.idMissao === missao.idMissao && item.dataRegistro === dataAtualDeSaoPaulo())) {
+          setAvisoRegistro('A ação desta missão já foi confirmada hoje.')
+          const [participacaoResultado, streakResultado] = await Promise.allSettled([
+            missaoService.buscarParticipacao(usuario.idUsuario, missao.idMissao),
+            streakService.buscarPorUsuario(usuario.idUsuario),
+          ])
+          if (participacaoResultado.status === 'fulfilled') {
+            const participacaoAtualizada = participacaoResultado.value
+            setParticipacoes((atuais) => [
+              ...atuais.filter((item) => item.idMissao !== participacaoAtualizada.idMissao),
+              participacaoAtualizada,
+            ])
+          }
+          if (streakResultado.status === 'fulfilled') setStreakAtualizada(streakResultado.value)
+          return
+        }
+      } catch {
+        // Mantém a mensagem de erro da gravação original como referência para a pessoa.
+      }
+      setErroRegistro(mensagemErro(erroAtividade, 'Não foi possível confirmar a ação de hoje. Tente novamente.'))
+    } finally {
+      setRegistrandoAtividade(null)
+    }
+  }
+
   async function criarMissao(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setCriando(true)
@@ -182,12 +276,18 @@ export default function MissoesApp() {
 
   function abrirDetalhes(idMissao: number) {
     setDetalhe({ status: 'loading' })
+    setErroRegistro('')
+    setAvisoRegistro('')
+    setStreakAtualizada(null)
     setIdMissaoSelecionada(idMissao)
   }
 
   function fecharDetalhes() {
     setIdMissaoSelecionada(null)
     setDetalhe({ status: 'idle' })
+    setErroRegistro('')
+    setAvisoRegistro('')
+    setStreakAtualizada(null)
   }
 
   function tentarCarregarMissoesNovamente() {
@@ -208,7 +308,7 @@ export default function MissoesApp() {
   return (
     <main className="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-10">
       <header className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-        <div>
+        <div className="pr-20 lg:pr-0">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-violet-700">Sua jornada</p>
           <h1 className="mt-2 text-3xl font-black tracking-tight text-zinc-950 sm:text-4xl">Missões</h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600 sm:text-base">
@@ -265,7 +365,7 @@ export default function MissoesApp() {
             <h2 id="titulo-lista-missoes" className="text-xl font-bold text-zinc-950">Encontre sua próxima missão</h2>
             <p className="mt-1 text-sm text-zinc-600">{missoes.length} {missoes.length === 1 ? 'missão cadastrada' : 'missões cadastradas'}</p>
           </div>
-          <div role="tablist" aria-label="Filtrar missões" className="-mb-px flex gap-5 overflow-x-auto lg:pr-24">
+          <div role="tablist" aria-label="Filtrar missões" className="-mb-px flex flex-wrap gap-x-5 gap-y-2 lg:pr-24">
             {filtros.map((item) => (
               <button
                 key={item.id}
@@ -298,6 +398,7 @@ export default function MissoesApp() {
                 const participacao = participacoesPorMissao.get(missao.idMissao)
                 const concluida = participacao?.status === 'CONCLUIDA'
                 const emAndamento = participacao?.status === 'EM_ANDAMENTO'
+                const diasConcluidos = diasAtividadePorMissao.get(missao.idMissao)?.size ?? 0
 
                 return (
                   <li key={missao.idMissao} className="flex flex-col gap-4 p-4 sm:p-5 md:flex-row md:items-center md:gap-6">
@@ -322,6 +423,7 @@ export default function MissoesApp() {
                         Meta: {missao.metaDias} {missao.metaDias === 1 ? 'dia' : 'dias'}
                         {participacao && <><span aria-hidden="true">·</span><CalendarDays aria-hidden="true" className="h-3.5 w-3.5" /> Iniciada em {formatarData(participacao.dataInicio)}</>}
                       </p>
+                      {emAndamento && <ProgressoMissao diasConcluidos={diasConcluidos} metaDias={missao.metaDias} />}
                     </div>
                     <div className="flex shrink-0 flex-col gap-2 sm:flex-row md:flex-col lg:flex-row">
                       <button
@@ -329,7 +431,7 @@ export default function MissoesApp() {
                         onClick={() => abrirDetalhes(missao.idMissao)}
                         className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold text-violet-700 transition hover:bg-violet-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
                       >
-                        Ver detalhes <ArrowRight aria-hidden="true" className="h-4 w-4" />
+                        {emAndamento ? 'Continuar' : 'Ver detalhes'} <ArrowRight aria-hidden="true" className="h-4 w-4" />
                       </button>
                       {!participacao && (
                         <button
@@ -385,9 +487,40 @@ export default function MissoesApp() {
                     <p className="mt-1 font-bold text-violet-900">{detalhe.data.pontosRecompensa} pontos</p>
                   </div>
                 </div>
-                {participacoesPorMissao.has(detalhe.data.idMissao) ? (
+                {participacoesPorMissao.has(detalhe.data.idMissao) && (
+                  <ProgressoMissao
+                    diasConcluidos={diasAtividadePorMissao.get(detalhe.data.idMissao)?.size ?? 0}
+                    metaDias={detalhe.data.metaDias}
+                  />
+                )}
+                {participacoesPorMissao.get(detalhe.data.idMissao)?.status === 'EM_ANDAMENTO' ? (
+                  <div className="mt-5 space-y-3">
+                    {diasAtividadePorMissao.get(detalhe.data.idMissao)?.has(dataAtualDeSaoPaulo()) ? (
+                      <p role="status" className="rounded-xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
+                        Ação de hoje registrada. Você pode confirmar uma nova ação amanhã.
+                      </p>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => void confirmarAcaoDoDia(detalhe.data as Missao)}
+                        disabled={registrandoAtividade !== null}
+                        className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-violet-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-violet-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 disabled:cursor-wait disabled:opacity-60 sm:w-auto"
+                      >
+                        {registrandoAtividade === detalhe.data.idMissao ? 'Registrando...' : 'Confirmar ação de hoje'}
+                        <Check aria-hidden="true" className="h-4 w-4" />
+                      </button>
+                    )}
+                    {avisoRegistro && <p role="status" className="text-sm font-medium text-emerald-800">{avisoRegistro}</p>}
+                    {streakAtualizada && (
+                      <p className="inline-flex items-center gap-2 rounded-xl bg-orange-50 px-4 py-3 text-sm font-semibold text-orange-800">
+                        <Flame aria-hidden="true" className="h-4 w-4" /> Streak atualizada: {streakAtualizada.diasConsecutivos} {streakAtualizada.diasConsecutivos === 1 ? 'dia' : 'dias'}
+                      </p>
+                    )}
+                    {erroRegistro && <p role="alert" className="text-sm font-medium text-rose-700">{erroRegistro}</p>}
+                  </div>
+                ) : participacoesPorMissao.get(detalhe.data.idMissao)?.status === 'CONCLUIDA' ? (
                   <p className="mt-5 rounded-xl bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-700">
-                    {participacoesPorMissao.get(detalhe.data.idMissao)?.status === 'CONCLUIDA' ? 'Missão concluída. Parabéns pelo seu progresso!' : 'Você já começou esta missão. Continue no seu ritmo!'}
+                    Missão concluída. Parabéns pelo seu progresso!
                   </p>
                 ) : (
                   <button

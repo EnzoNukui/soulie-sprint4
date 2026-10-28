@@ -295,7 +295,7 @@ export default function Comunidades() {
   return (
     <main className="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-10">
       <header className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-        <div>
+        <div className="pr-20 lg:pr-0">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-violet-700">Encontre seu espaço</p>
           <h1 className="mt-2 text-3xl font-black tracking-tight text-zinc-950 sm:text-4xl">Comunidades</h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600 sm:text-base">
@@ -319,26 +319,28 @@ export default function Comunidades() {
 
       {!carregando && !erro && todasSugestoes.length > 0 && (
         <section id="sugestoes-soulie" aria-labelledby="titulo-sugestoes-soulie" className="mt-7 rounded-3xl border border-violet-200 bg-gradient-to-r from-violet-50 to-white p-5 sm:p-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-            <img src={soulieApontando} alt="" className="h-16 w-16 shrink-0 -scale-x-100 object-contain" />
-            <div className="min-w-0 flex-1">
-              <h2 id="titulo-sugestoes-soulie" className="text-lg font-bold text-violet-950">Sugestões da Soulie</h2>
-              <p className="mt-1 text-sm leading-6 text-zinc-600">{mensagemSugestoes}</p>
-              <ul className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                {todasSugestoes.map((comunidade) => (
-                  <li key={comunidade.idComunidade} className="flex min-w-0 items-center gap-3 rounded-2xl border border-violet-100 bg-white p-3">
-                    <img src={capaDaComunidade(comunidade)} alt="" loading="lazy" referrerPolicy="no-referrer" onError={(event) => { event.currentTarget.style.visibility = 'hidden' }} className="h-12 w-12 shrink-0 rounded-xl bg-violet-100 object-cover" />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-bold text-zinc-900">{comunidade.nome}</p>
-                      <p className="truncate text-xs text-zinc-500">{comunidade.tema}</p>
-                    </div>
-                    <button type="button" onClick={() => void participar(comunidade)} disabled={idEntrando !== null} className="shrink-0 rounded-lg px-2 py-2 text-xs font-bold text-violet-700 transition hover:bg-violet-50 disabled:opacity-50">
-                      {idEntrando === comunidade.idComunidade ? 'Entrando...' : 'Participar'}
-                    </button>
-                  </li>
-                ))}
-              </ul>
+          <div>
+            <div className="flex items-center gap-3">
+              <img src={soulieApontando} alt="" className="h-14 w-14 shrink-0 -scale-x-100 object-contain sm:h-16 sm:w-16" />
+              <div className="min-w-0 flex-1">
+                <h2 id="titulo-sugestoes-soulie" className="text-lg font-bold text-violet-950">Sugestões da Soulie</h2>
+                <p className="mt-1 text-sm leading-6 text-zinc-600">{mensagemSugestoes}</p>
+              </div>
             </div>
+            <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-1 lg:pr-24 xl:grid-cols-3">
+              {todasSugestoes.map((comunidade) => (
+                <li key={comunidade.idComunidade} className="flex min-w-0 items-center gap-3 rounded-2xl border border-violet-100 bg-white p-3">
+                  <img src={capaDaComunidade(comunidade)} alt="" loading="lazy" referrerPolicy="no-referrer" onError={(event) => { event.currentTarget.style.visibility = 'hidden' }} className="h-12 w-12 shrink-0 rounded-xl bg-violet-100 object-cover" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-bold text-zinc-900">{comunidade.nome}</p>
+                    <p className="truncate text-xs text-zinc-500">{comunidade.tema}</p>
+                  </div>
+                  <button type="button" onClick={() => void participar(comunidade)} disabled={idEntrando !== null} className="shrink-0 rounded-lg px-2 py-2 text-xs font-bold text-violet-700 transition hover:bg-violet-50 disabled:opacity-50">
+                    {idEntrando === comunidade.idComunidade ? 'Entrando...' : 'Participar'}
+                  </button>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
       )}
@@ -512,6 +514,7 @@ export default function Comunidades() {
         mensagem={mensagemAcaoSoulie}
         rotuloAcao={rotuloAcaoSoulie}
         onAcao={executarAcaoSoulie}
+        posicaoVertical="superior"
       />
     </main>
   )

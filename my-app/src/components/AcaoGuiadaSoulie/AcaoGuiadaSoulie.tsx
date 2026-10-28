@@ -6,10 +6,20 @@ interface AcaoGuiadaSoulieProps {
   mensagem: string
   rotuloAcao: string
   onAcao: () => void
+  posicaoVertical?: 'centro' | 'superior'
 }
 
-export default function AcaoGuiadaSoulie({ imagem, mensagem, rotuloAcao, onAcao }: AcaoGuiadaSoulieProps) {
+export default function AcaoGuiadaSoulie({
+  imagem,
+  mensagem,
+  rotuloAcao,
+  onAcao,
+  posicaoVertical = 'centro',
+}: AcaoGuiadaSoulieProps) {
   const [aberto, setAberto] = useState(false)
+  const posicionamentoVertical = posicaoVertical === 'superior'
+    ? 'top-32 sm:top-36 lg:top-[35%]'
+    : 'top-32 sm:top-36 lg:top-[42%]'
 
   function executarAcao() {
     setAberto(false)
@@ -17,12 +27,12 @@ export default function AcaoGuiadaSoulie({ imagem, mensagem, rotuloAcao, onAcao 
   }
 
   return (
-    <div className="fixed bottom-24 right-4 z-40 lg:bottom-auto lg:right-6 lg:top-[42%] lg:-translate-y-1/2">
+    <div className={`fixed right-4 z-40 ${posicionamentoVertical} -translate-y-1/2 sm:right-6`}>
       {aberto && (
         <section
           role="dialog"
           aria-label="Sugestão da Soulie"
-          className="absolute bottom-full right-0 mb-3 w-[min(17rem,calc(100vw-2rem))] rounded-2xl border border-violet-200 bg-white p-4 shadow-[0_18px_55px_-24px_rgba(46,16,101,0.38)] lg:bottom-auto lg:right-full lg:top-1/2 lg:mr-3 lg:mb-0 lg:-translate-y-1/2"
+          className="absolute right-0 top-full mt-3 w-[min(17rem,calc(100vw-2rem))] rounded-2xl border border-violet-200 bg-white p-4 shadow-[0_18px_55px_-24px_rgba(46,16,101,0.38)] lg:right-full lg:top-1/2 lg:mr-3 lg:mt-0 lg:-translate-y-1/2"
         >
           <div className="flex items-start justify-between gap-3">
             <h2 className="text-sm font-bold text-violet-800">Uma dica da Soulie</h2>
