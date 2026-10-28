@@ -1,5 +1,6 @@
-import { House, Target, UsersRound } from 'lucide-react'
-import { NavLink } from 'react-router-dom'
+import { House, LogOut, Target, UsersRound } from 'lucide-react'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { usuarioSessaoService } from '../../services/usuarioSessaoService'
 
 const links = [
   { nome: 'Início', caminho: '/app', icone: House, exato: true },
@@ -8,6 +9,13 @@ const links = [
 ]
 
 export default function MenuApp() {
+  const navigate = useNavigate()
+
+  function sair() {
+    usuarioSessaoService.encerrar()
+    navigate('/', { replace: true })
+  }
+
   return (
     <>
       <aside className="hidden min-h-screen border-r border-violet-100 bg-white px-6 py-8 lg:sticky lg:top-0 lg:flex lg:flex-col">
@@ -33,9 +41,15 @@ export default function MenuApp() {
             </NavLink>
           ))}
         </nav>
-        <div className="mt-auto rounded-2xl bg-violet-50 p-4">
-          <p className="text-sm font-bold text-violet-950">Sua jornada</p>
-          <p className="mt-1 text-xs leading-5 text-zinc-600">Pequenas ações sustentáveis começam por aqui.</p>
+        <div className="mt-auto flex justify-center pt-6">
+          <button
+            type="button"
+            onClick={sair}
+            className="flex w-full max-w-[220px] items-center justify-center gap-2 rounded-full bg-violet-50 px-5 py-3 text-sm font-medium text-violet-800 transition hover:bg-violet-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+          >
+            <LogOut aria-hidden="true" className="h-4 w-4" />
+            Sair
+          </button>
         </div>
       </aside>
 
@@ -48,7 +62,7 @@ export default function MenuApp() {
 
       <nav
         aria-label="Navegação do aplicativo"
-        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-3 border-t border-violet-100 bg-white/95 px-2 py-2 shadow-[0_-8px_24px_-20px_rgba(24,24,27,0.5)] backdrop-blur lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-violet-100 bg-white/95 px-2 py-2 shadow-[0_-8px_24px_-20px_rgba(24,24,27,0.5)] backdrop-blur lg:hidden"
       >
         {links.map(({ nome, caminho, icone: Icone, exato }) => (
           <NavLink
@@ -65,6 +79,16 @@ export default function MenuApp() {
             {nome}
           </NavLink>
         ))}
+        <button
+          type="button"
+          onClick={sair}
+          aria-label="Sair"
+          title="Sair"
+          className="flex flex-col items-center justify-center gap-1 rounded-xl px-2 py-2 text-[11px] font-semibold text-zinc-500 transition hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+        >
+          <LogOut aria-hidden="true" className="h-5 w-5" />
+          Sair
+        </button>
       </nav>
     </>
   )
