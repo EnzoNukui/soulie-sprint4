@@ -50,7 +50,7 @@ export default function Rodape() {
         </div>
 
         <div className="mt-10 border-t border-white/10 pt-6 text-center text-xs text-violet-300 sm:text-left sm:text-sm">
-          <p>© 2026 Soulie. Todos os direitos reservados.</p>
+          <p>© {new Date().getFullYear()} Soulie. Todos os direitos reservados.</p>
         </div>
       </div>
     </footer>
