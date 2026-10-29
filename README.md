@@ -1,5 +1,18 @@
 # Soulie | Front-end Design Engineering — Sprint 4
 
+<p align="center">
+  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&amp;logo=react&amp;logoColor=61DAFB" alt="React">
+  <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&amp;logo=vite&amp;logoColor=white" alt="Vite">
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&amp;logo=typescript&amp;logoColor=white" alt="TypeScript">
+  <img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&amp;logo=tailwindcss&amp;logoColor=white" alt="Tailwind CSS">
+  <br>
+  <img src="https://img.shields.io/badge/React_Router-CA4245?style=for-the-badge&amp;logo=reactrouter&amp;logoColor=white" alt="React Router">
+  <img src="https://img.shields.io/badge/React_Hook_Form-EC5990?style=for-the-badge&amp;logo=reacthookform&amp;logoColor=white" alt="React Hook Form">
+  <img src="https://img.shields.io/badge/Lucide-111827?style=for-the-badge&amp;logo=lucide&amp;logoColor=white" alt="Lucide">
+  <img src="https://img.shields.io/badge/API_Java-ED8B00?style=for-the-badge&amp;logo=openjdk&amp;logoColor=white" alt="API Java">
+  <img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&amp;logo=vercel&amp;logoColor=white" alt="Vercel">
+</p>
+
 A **Soulie** é uma companheira digital da SoulUp que transforma ações sustentáveis em uma jornada com missões, progresso e comunidades. O projeto busca incentivar a continuidade dos hábitos e aproximar as pessoas da proposta da plataforma.
 
 Nesta Sprint 4, o site e o aplicativo formam uma **SPA em React, Vite e TypeScript**. O aplicativo consome a **API REST desenvolvida em Java pelo grupo** para consultar e registrar dados reais. A interface usa Tailwind CSS e se adapta a celular, tablet e desktop.
