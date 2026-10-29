@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ArrowLeft, ArrowRight, CalendarDays, Users } from 'lucide-react'
-import { Link, useOutletContext, useParams } from 'react-router-dom'
+import { Link, useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import avatarRadiante from '../../assets/avatar/expressoes/avatar_radiante.png'
 import avatarSorridente from '../../assets/avatar/expressoes/avatar_sorridente.png'
-import AcaoGuiadaSoulie from '../../components/AcaoGuiadaSoulie/AcaoGuiadaSoulie'
+import AcaoGuiadaSoulie, { type PassoGuiaSoulie } from '../../components/AcaoGuiadaSoulie/AcaoGuiadaSoulie'
+import { guiarParaElemento } from '../../components/AcaoGuiadaSoulie/guiarParaElemento'
 import FormPublicacaoComunidade from '../../components/FormPublicacaoComunidade/FormPublicacaoComunidade'
 import EmptyState from '../../components/EmptyState/EmptyState'
 import ErrorState from '../../components/ErrorState/ErrorState'
@@ -64,6 +65,7 @@ export default function ComunidadeDetalhe() {
 }
 
 function DetalheComunidade({ id }: { id?: string }) {
+  const navigate = useNavigate()
   const usuario = useOutletContext<Usuario>()
   const idComunidade = Number(id)
   const idValido = Number.isSafeInteger(idComunidade) && idComunidade > 0
@@ -239,19 +241,24 @@ function DetalheComunidade({ id }: { id?: string }) {
     : { status: 'loading' }
   const jaParticipa = estadoParticipacaoAtual.status === 'success' && Boolean(estadoParticipacaoAtual.data)
   const temPublicacoes = publicacoes.status === 'success' && publicacoes.data.length > 0
-  const mensagemSoulie = jaParticipa
-    ? temPublicacoes
-      ? 'As conversas da comunidade estão aqui. Veja as publicações recentes e acompanhe as ideias do grupo.'
-      : 'Você já faz parte deste espaço. Quando alguém publicar uma ideia, ela aparecerá nesta área.'
-    : 'Dê uma olhada nas conversas da comunidade. Se o tema combinar com você, participe para fazer parte do grupo.'
-
-  function executarAcaoSoulie() {
-    if (!jaParticipa) {
-      void alternarParticipacao()
-      return
-    }
-    document.getElementById('nova-publicacao-comunidade')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-  }
+  const passosSoulie: PassoGuiaSoulie[] = [
+    {
+      id: 'participar', titulo: jaParticipa ? 'Escrever publicação' : 'Participar do grupo',
+      descricao: jaParticipa ? 'Dê um título e compartilhe sua ideia.' : 'Veja onde tocar para entrar e publicar.',
+      acao: jaParticipa ? 'Ir para o formulário' : 'Mostrar onde participar', icone: jaParticipa ? 'publicacao' : 'comunidade',
+      executar: () => jaParticipa ? guiarParaElemento('nova-publicacao-comunidade', 'titulo-publicacao-comunidade') : guiarParaElemento('participar-comunidade'),
+      destaque: true,
+    },
+    {
+      id: 'ler', titulo: 'Ver publicações',
+      descricao: temPublicacoes ? 'Leia as ideias mais recentes do grupo.' : 'As novas conversas vão aparecer aqui.',
+      acao: 'Mostrar publicações', icone: 'explorar', executar: () => guiarParaElemento('feed-comunidade', 'titulo-feed-comunidade'),
+    },
+    {
+      id: 'explorar', titulo: 'Explorar outros grupos', descricao: 'Volte à lista e encontre novos temas.',
+      acao: 'Explorar comunidades', icone: 'comunidade', executar: () => navigate('/app/comunidades'),
+    },
+  ]
 
   function tentarNovamente() {
     setIdParticipacaoCarregada(null)
@@ -299,7 +306,7 @@ function DetalheComunidade({ id }: { id?: string }) {
                 </p>
               </div>
               {estadoParticipacaoAtual.status === 'success' ? (
-                <button type="button" onClick={() => void alternarParticipacao()} disabled={processando} className={estadoParticipacaoAtual.data
+                <button id="participar-comunidade" type="button" onClick={() => void alternarParticipacao()} disabled={processando} className={estadoParticipacaoAtual.data
                   ? 'min-h-11 shrink-0 rounded-xl border border-zinc-300 px-5 py-2.5 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50 disabled:opacity-50'
                   : 'inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-violet-700 disabled:opacity-50'}>
                   {processando ? 'Aguarde...' : estadoParticipacaoAtual.data ? 'Sair da comunidade' : 'Participar da comunidade'}
@@ -373,10 +380,8 @@ function DetalheComunidade({ id }: { id?: string }) {
           {estadoParticipacaoAtual.status === 'success' && (
             <AcaoGuiadaSoulie
               imagem={jaParticipa ? avatarRadiante : avatarSorridente}
-              mensagem={mensagemSoulie}
-              rotuloAcao={jaParticipa ? 'Criar publicação' : 'Participar da comunidade'}
-              onAcao={executarAcaoSoulie}
-              posicaoVertical="superior"
+              titulo="Neste grupo"
+              passos={passosSoulie}
             />
           )}
         </>

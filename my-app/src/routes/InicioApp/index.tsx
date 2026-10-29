@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ArrowRight, Flame, MessageCircle, Send, Star, TrendingUp } from 'lucide-react'
 import { Link, useNavigate, useOutletContext } from 'react-router-dom'
-import avatarDuvida from '../../assets/avatar/expressoes/avatar_duvida.png'
 import avatarRadiante from '../../assets/avatar/expressoes/avatar_radiante.png'
 import avatarSorridente from '../../assets/avatar/expressoes/avatar_sorridente.png'
 import AcoesPublicacao from '../../components/AcoesPublicacao/AcoesPublicacao'
-import AcaoGuiadaSoulie from '../../components/AcaoGuiadaSoulie/AcaoGuiadaSoulie'
+import AcaoGuiadaSoulie, { type PassoGuiaSoulie } from '../../components/AcaoGuiadaSoulie/AcaoGuiadaSoulie'
+import { guiarParaElemento } from '../../components/AcaoGuiadaSoulie/guiarParaElemento'
 import EmptyState from '../../components/EmptyState/EmptyState'
 import ErrorState from '../../components/ErrorState/ErrorState'
 import LoadingState from '../../components/LoadingState/LoadingState'
@@ -190,38 +190,33 @@ export default function InicioApp() {
     ? Math.round((participacoesConcluidas.length / participacoes.length) * 100)
     : 0
 
-  const acaoSoulie = useMemo(() => {
-    if (!minhasComunidades.length) {
-      return {
-        imagem: avatarDuvida,
-        mensagem: 'Você ainda não entrou em uma comunidade. Encontre um grupo para trocar ideias e acompanhar outras jornadas.',
-        rotuloAcao: 'Explorar comunidades',
-        executar: () => navigate('/app/comunidades'),
-      }
-    }
-    if (participacoesAtivas.length) {
-      return {
-        imagem: avatarSorridente,
-        mensagem: `Você tem ${participacoesAtivas.length} ${participacoesAtivas.length === 1 ? 'missão em andamento' : 'missões em andamento'}. Continue sua jornada no seu ritmo.`,
-        rotuloAcao: 'Ver minhas missões',
-        executar: () => navigate('/app/missoes'),
-      }
-    }
-    if (!postagens.length) {
-      return {
-        imagem: avatarDuvida,
-        mensagem: 'Sua primeira publicação pode inspirar outras pessoas. Conte para a comunidade uma pequena ação sustentável que você já colocou em prática.',
-        rotuloAcao: 'Compartilhar uma conquista',
-        executar: irParaPublicacao,
-      }
-    }
-    return {
-      imagem: avatarRadiante,
-      mensagem: 'Que tal dar o próximo passo? Uma missão pode transformar uma pequena ação em um novo hábito.',
-      rotuloAcao: 'Encontrar uma missão',
+  const passosSoulie: PassoGuiaSoulie[] = [
+    {
+      id: 'missao',
+      titulo: participacoesAtivas.length ? 'Continuar missão' : 'Escolher missão',
+      descricao: participacoesAtivas.length ? 'Abra o desafio e confirme sua ação do dia.' : 'Veja a meta e comece um desafio.',
+      acao: 'Abrir missões',
+      icone: 'missao',
       executar: () => navigate('/app/missoes'),
-    }
-  }, [minhasComunidades.length, navigate, participacoesAtivas.length, postagens.length])
+      destaque: true,
+    },
+    {
+      id: 'comunidade',
+      titulo: minhasComunidades.length ? 'Ver meus grupos' : 'Encontrar um grupo',
+      descricao: minhasComunidades.length ? 'Leia as novidades das suas comunidades.' : 'Explore os temas e escolha um grupo.',
+      acao: 'Explorar grupos',
+      icone: 'comunidade',
+      executar: () => navigate('/app/comunidades'),
+    },
+    {
+      id: 'publicacao',
+      titulo: 'Publicar uma ideia',
+      descricao: minhasComunidades.length ? 'Escolha o grupo e escreva sua mensagem.' : 'Entre em um grupo para começar a publicar.',
+      acao: minhasComunidades.length ? 'Ir para o formulário' : 'Encontrar um grupo',
+      icone: 'publicacao',
+      executar: minhasComunidades.length ? irParaPublicacao : () => navigate('/app/comunidades'),
+    },
+  ]
 
   function tentarNovamente() {
     setCarregando(true)
@@ -281,8 +276,7 @@ export default function InicioApp() {
   }
 
   function irParaPublicacao() {
-    document.getElementById('nova-publicacao')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    document.getElementById('titulo-publicacao')?.focus({ preventScroll: true })
+    guiarParaElemento('nova-publicacao', 'titulo-publicacao')
   }
 
   if (carregando) {
@@ -292,7 +286,7 @@ export default function InicioApp() {
   return (
     <main className="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-10">
       <header className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
-        <div className="pr-20 lg:pr-0">
+        <div>
           <h1 className="text-3xl font-black tracking-tight text-zinc-950 sm:text-4xl">Olá, {nomeCurto(usuario.nomeUsuario)}<span aria-hidden="true">!</span></h1>
           <p className="mt-2 max-w-2xl text-base leading-7 text-zinc-600">Acompanhe sua jornada e veja o que a comunidade está fazendo.</p>
         </div>
@@ -413,10 +407,9 @@ export default function InicioApp() {
       </section>
 
       <AcaoGuiadaSoulie
-        imagem={acaoSoulie.imagem}
-        mensagem={acaoSoulie.mensagem}
-        rotuloAcao={acaoSoulie.rotuloAcao}
-        onAcao={acaoSoulie.executar}
+        imagem={participacoesConcluidas.length ? avatarRadiante : avatarSorridente}
+        titulo="Próximos passos"
+        passos={passosSoulie}
       />
     </main>
   )

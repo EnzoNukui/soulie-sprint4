@@ -3,7 +3,8 @@ import { ArrowRight, CalendarDays, Check, CircleCheck, Flame, Plus, Target, X } 
 import { useOutletContext } from 'react-router-dom'
 import avatarRadiante from '../../assets/avatar/expressoes/avatar_radiante.png'
 import avatarSorridente from '../../assets/avatar/expressoes/avatar_sorridente.png'
-import AcaoGuiadaSoulie from '../../components/AcaoGuiadaSoulie/AcaoGuiadaSoulie'
+import AcaoGuiadaSoulie, { type PassoGuiaSoulie } from '../../components/AcaoGuiadaSoulie/AcaoGuiadaSoulie'
+import { guiarParaElemento } from '../../components/AcaoGuiadaSoulie/guiarParaElemento'
 import EmptyState from '../../components/EmptyState/EmptyState'
 import ErrorState from '../../components/ErrorState/ErrorState'
 import LoadingState from '../../components/LoadingState/LoadingState'
@@ -152,11 +153,7 @@ export default function MissoesApp() {
   }), [filtro, missoes, participacoesPorMissao])
 
   const missaoSugerida = missoes.find((missao) => participacoesPorMissao.get(missao.idMissao)?.status !== 'CONCLUIDA')
-  const mensagemSoulie = missoesConcluidas > 0
-    ? 'Você já concluiu ' + missoesConcluidas + ' ' + (missoesConcluidas === 1 ? 'missão' : 'missões') + '. Que tal escolher o próximo desafio?'
-    : missoesEmAndamento > 0
-      ? 'Continue no seu ritmo. Suas missões em andamento estão aqui para você retomar.'
-      : 'Escolha uma missão que combine com você e comece com um pequeno passo.'
+  const missaoEmAndamento = missoes.find((missao) => participacoesPorMissao.get(missao.idMissao)?.status === 'EM_ANDAMENTO')
 
   async function entrarNaMissao(missao: Missao) {
     setEntrandoNaMissao(missao.idMissao)
@@ -296,19 +293,31 @@ export default function MissoesApp() {
     setTentativa((valor) => valor + 1)
   }
 
-  function executarSugestaoSoulie() {
-    if (missaoSugerida) {
-      setFiltro('todas')
-      abrirDetalhes(missaoSugerida.idMissao)
-      return
-    }
-    setAbrirCriacao(true)
-  }
+  const missaoParaGuia = missaoEmAndamento ?? missaoSugerida ?? missoes[0]
+  const passosSoulie: PassoGuiaSoulie[] = erro ? [{
+    id: 'recarregar', titulo: 'Recarregar missões', descricao: 'A lista não carregou. Tente novamente.',
+    acao: 'Tentar novamente', icone: 'retomar', executar: tentarCarregarMissoesNovamente, destaque: true,
+  }] : [
+    ...(missoes.length ? [{
+      id: 'explorar', titulo: 'Explorar missões', descricao: 'Use as abas para filtrar os desafios.',
+      acao: 'Mostrar as missões', icone: 'explorar' as const, executar: () => guiarParaElemento('lista-missoes', 'titulo-lista-missoes'), destaque: !missaoEmAndamento,
+    }] : []),
+    ...(missaoParaGuia ? [{
+      id: 'detalhe', titulo: missaoEmAndamento ? 'Registrar ação de hoje' : missaoSugerida ? 'Ver como começar' : 'Ver conquista',
+      descricao: missaoEmAndamento ? 'Confirme a ação depois de fazer o desafio.' : 'Confira a meta e os pontos da missão.',
+      acao: missaoEmAndamento ? 'Abrir minha missão' : 'Ver detalhe da missão', icone: 'missao' as const,
+      executar: () => abrirDetalhes(missaoParaGuia.idMissao), destaque: Boolean(missaoEmAndamento),
+    }] : []),
+    {
+      id: 'criar', titulo: 'Criar missão', descricao: 'Escolha uma ação, uma meta e os pontos.',
+      acao: 'Criar uma missão', icone: 'criar', executar: () => { setErroAcao(''); setAbrirCriacao(true) }, destaque: missoes.length === 0,
+    },
+  ]
 
   return (
     <main className="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-10">
       <header className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-        <div className="pr-20 lg:pr-0">
+        <div>
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-violet-700">Sua jornada</p>
           <h1 className="mt-2 text-3xl font-black tracking-tight text-zinc-950 sm:text-4xl">Missões</h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600 sm:text-base">
@@ -359,13 +368,13 @@ export default function MissoesApp() {
         </section>
       )}
 
-      <section aria-labelledby="titulo-lista-missoes" className="mt-8">
+      <section id="lista-missoes" aria-labelledby="titulo-lista-missoes" className="mt-8">
         <div className="flex flex-col gap-4 border-b border-zinc-200 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 id="titulo-lista-missoes" className="text-xl font-bold text-zinc-950">Encontre sua próxima missão</h2>
             <p className="mt-1 text-sm text-zinc-600">{missoes.length} {missoes.length === 1 ? 'missão cadastrada' : 'missões cadastradas'}</p>
           </div>
-          <div role="tablist" aria-label="Filtrar missões" className="-mb-px flex flex-wrap gap-x-5 gap-y-2 lg:pr-24">
+          <div role="tablist" aria-label="Filtrar missões" className="-mb-px flex flex-wrap gap-x-5 gap-y-2">
             {filtros.map((item) => (
               <button
                 key={item.id}
@@ -467,7 +476,7 @@ export default function MissoesApp() {
                 {detalhe.status === 'success' && <h2 id="titulo-detalhe-missao" className="mt-2 text-2xl font-black text-zinc-950">{detalhe.data?.nome}</h2>}
                 {detalhe.status !== 'success' && <h2 id="titulo-detalhe-missao" className="sr-only">Detalhes da missão selecionada</h2>}
               </div>
-              <button type="button" onClick={fecharDetalhes} aria-label="Fechar detalhes" className="rounded-lg p-2 text-zinc-500 transition hover:bg-violet-50 hover:text-violet-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
+              <button autoFocus type="button" onClick={fecharDetalhes} aria-label="Fechar detalhes" className="rounded-lg p-2 text-zinc-500 transition hover:bg-violet-50 hover:text-violet-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
                 <X aria-hidden="true" className="h-5 w-5" />
               </button>
             </div>
@@ -556,7 +565,7 @@ export default function MissoesApp() {
             <form onSubmit={(event) => void criarMissao(event)} className="mt-6 space-y-4">
               <label className="block text-sm font-semibold text-zinc-800">
                 Nome da missão
-                <input value={nome} onChange={(event) => setNome(event.target.value)} required maxLength={100} className="mt-2 h-11 w-full rounded-xl border border-zinc-300 px-3 font-normal outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-100" placeholder="Ex.: Leve sua própria garrafa" />
+                <input autoFocus value={nome} onChange={(event) => setNome(event.target.value)} required maxLength={100} className="mt-2 h-11 w-full rounded-xl border border-zinc-300 px-3 font-normal outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-100" placeholder="Ex.: Leve sua própria garrafa" />
               </label>
               <label className="block text-sm font-semibold text-zinc-800">
                 Descrição
@@ -586,9 +595,9 @@ export default function MissoesApp() {
 
       <AcaoGuiadaSoulie
         imagem={missoesConcluidas > 0 ? avatarRadiante : avatarSorridente}
-        mensagem={mensagemSoulie}
-        rotuloAcao={missaoSugerida ? 'Ver sugestão' : 'Criar missão'}
-        onAcao={executarSugestaoSoulie}
+        titulo="Avance nas missões"
+        passos={passosSoulie}
+        carregando={carregando}
       />
     </main>
   )

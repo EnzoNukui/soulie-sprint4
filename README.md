@@ -47,6 +47,7 @@ A URL base utilizada pelo front-end para a API é **https://soulie-java.onrender
 - **Publicações:** feed com dados da API, criação, edição e exclusão pelo autor.
 - **Contato:** formulário validado com envio por e-mail e retorno de sucesso ou erro.
 - **Estados de interface:** mensagens de carregamento, erro e ausência de dados nas consultas relevantes.
+- **Guia interativo da Soulie:** trilhas de ações no Início, nas Missões e nas Comunidades. Cada passo abre a página ou destaca o controle correspondente, com orientações adaptadas à participação do usuário.
 
 ### Da Sprint 3 para a Sprint 4
 

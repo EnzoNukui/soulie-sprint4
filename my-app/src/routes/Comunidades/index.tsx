@@ -4,7 +4,8 @@ import { useNavigate, useOutletContext } from 'react-router-dom'
 import avatarRadiante from '../../assets/avatar/expressoes/avatar_radiante.png'
 import avatarSorridente from '../../assets/avatar/expressoes/avatar_sorridente.png'
 import soulieApontando from '../../assets/avatar/integrantes/soulie-apontando.png'
-import AcaoGuiadaSoulie from '../../components/AcaoGuiadaSoulie/AcaoGuiadaSoulie'
+import AcaoGuiadaSoulie, { type PassoGuiaSoulie } from '../../components/AcaoGuiadaSoulie/AcaoGuiadaSoulie'
+import { guiarParaElemento } from '../../components/AcaoGuiadaSoulie/guiarParaElemento'
 import CardComunidade from '../../components/CardComunidade/CardComunidade'
 import EmptyState from '../../components/EmptyState/EmptyState'
 import ErrorState from '../../components/ErrorState/ErrorState'
@@ -177,28 +178,6 @@ export default function Comunidades() {
   const temFiltroAtivo = Boolean(busca.trim()) || temaSelecionado !== 'Todos'
   const resultadoDoFiltro = temFiltroAtivo ? comunidadesVisiveis[0] : undefined
   const comunidadeSugerida = resultadoDoFiltro ?? sugestoesRelacionadas[0] ?? comunidadesDisponiveis[0]
-  const mensagemAcaoSoulie = resultadoDoFiltro
-      ? `Encontrei “${resultadoDoFiltro.nome}” com os filtros escolhidos. Veja os detalhes e participe se fizer sentido para você.`
-      : temFiltroAtivo && comunidadeSugerida && sugestoesRelacionadas[0]
-        ? `Não encontrei uma comunidade com esses filtros, mas pelo tema de “${minhasComunidades[0].nome}” talvez você goste de “${comunidadeSugerida.nome}”.`
-        : temFiltroAtivo && comunidadeSugerida
-          ? `Não encontrei uma comunidade com esses filtros. Como alternativa, você pode conhecer “${comunidadeSugerida.nome}”, sobre ${comunidadeSugerida.tema.toLowerCase()}.`
-          : sugestoesRelacionadas[0]
-            ? `Como você já participa de “${minhasComunidades[0].nome}”, talvez goste de “${sugestoesRelacionadas[0].nome}”, sobre ${sugestoesRelacionadas[0].tema.toLowerCase()}.`
-            : comunidadeSugerida
-              ? `Ainda não participa de uma comunidade? “${comunidadeSugerida.nome}”, sobre ${comunidadeSugerida.tema.toLowerCase()}, pode ser um bom lugar para começar.`
-              : minhasComunidades[0]
-                ? `Você já participa de “${minhasComunidades[0].nome}”. Volte aos detalhes para acompanhar esse espaço.`
-                : 'Ainda não há comunidades disponíveis para participar.'
-  const rotuloAcaoSoulie = resultadoDoFiltro
-      ? 'Ver comunidade'
-      : temFiltroAtivo && comunidadeSugerida
-        ? 'Ver alternativa'
-        : comunidadeSugerida
-          ? 'Conhecer comunidade'
-          : minhasComunidades[0]
-            ? 'Ver minha comunidade'
-            : 'Ver comunidades'
 
   async function participar(comunidade: Comunidade) {
     setIdEntrando(comunidade.idComunidade)
@@ -287,22 +266,29 @@ export default function Comunidades() {
     setTentativa((valor) => valor + 1)
   }
 
-  function executarAcaoSoulie() {
-    if (comunidadeSugerida) {
-      abrirDetalhes(comunidadeSugerida.idComunidade)
-      return
-    }
-    if (minhasComunidades[0]) {
-      abrirDetalhes(minhasComunidades[0].idComunidade)
-      return
-    }
-    document.getElementById('lista-comunidades')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
+  const comunidadeParaGuia = comunidadeSugerida ?? minhasComunidades[0]
+  const passosSoulie: PassoGuiaSoulie[] = erro ? [{
+    id: 'recarregar', titulo: 'Recarregar grupos', descricao: 'A lista não carregou. Tente novamente.',
+    acao: 'Tentar novamente', icone: 'retomar', executar: tentarCarregarNovamente, destaque: true,
+  }] : [
+    ...(comunidades.length ? [{
+      id: 'buscar', titulo: 'Buscar por tema', descricao: 'Digite um nome ou use os filtros.',
+      acao: 'Mostrar a busca', icone: 'explorar' as const, executar: () => guiarParaElemento('busca-comunidades'), destaque: true,
+    }] : []),
+    ...(comunidadeParaGuia ? [{
+      id: 'conhecer', titulo: 'Conhecer um grupo', descricao: comunidadeParaGuia.nome,
+      acao: 'Abrir comunidade', icone: 'comunidade' as const, executar: () => abrirDetalhes(comunidadeParaGuia.idComunidade),
+    }] : []),
+    {
+      id: 'criar', titulo: 'Criar comunidade', descricao: 'Defina um nome e um tema para seu grupo.',
+      acao: 'Abrir formulário', icone: 'criar', executar: () => { setErroAcao(''); setAbrirCriacao(true) }, destaque: comunidades.length === 0,
+    },
+  ]
 
   return (
     <main className="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-10">
       <header className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-        <div className="pr-20 lg:pr-0">
+        <div>
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-violet-700">Encontre seu espaço</p>
           <h1 className="mt-2 text-3xl font-black tracking-tight text-zinc-950 sm:text-4xl">Comunidades</h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600 sm:text-base">
@@ -313,7 +299,7 @@ export default function Comunidades() {
           <label className="relative block min-w-0 sm:min-w-64">
             <span className="sr-only">Buscar comunidades</span>
             <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
-            <input value={busca} onChange={(event) => setBusca(event.target.value)} type="search" placeholder="Buscar comunidades" className="h-11 w-full rounded-xl border border-zinc-200 bg-white pl-10 pr-3 text-sm outline-none transition placeholder:text-zinc-500 focus:border-violet-500 focus:ring-4 focus:ring-violet-100" />
+            <input id="busca-comunidades" value={busca} onChange={(event) => setBusca(event.target.value)} type="search" placeholder="Buscar comunidades" className="h-11 w-full rounded-xl border border-zinc-200 bg-white pl-10 pr-3 text-sm outline-none transition placeholder:text-zinc-500 focus:border-violet-500 focus:ring-4 focus:ring-violet-100" />
           </label>
           <button type="button" onClick={() => { setErroAcao(''); setAbrirCriacao(true) }} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-violet-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
             <Plus aria-hidden="true" className="h-4 w-4" /> Criar comunidade
@@ -334,7 +320,7 @@ export default function Comunidades() {
                 <p className="mt-1 text-sm leading-6 text-zinc-600">{mensagemSugestoes}</p>
               </div>
             </div>
-            <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-1 lg:pr-24 xl:grid-cols-3">
+            <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-3">
               {todasSugestoes.map((comunidade) => (
                 <li key={comunidade.idComunidade} className="flex min-w-0 items-center gap-3 rounded-2xl border border-violet-100 bg-white p-3">
                   <img src={capaDaComunidade(comunidade)} alt="" loading="lazy" referrerPolicy="no-referrer" onError={(event) => { event.currentTarget.style.visibility = 'hidden' }} className="h-12 w-12 shrink-0 rounded-xl bg-violet-100 object-cover" />
@@ -455,7 +441,7 @@ export default function Comunidades() {
             <form onSubmit={(event) => void criarComunidade(event)} className="mt-6 space-y-4">
               <label className="block text-sm font-semibold text-zinc-800">
                 Nome da comunidade
-                <input value={nome} onChange={(event) => setNome(event.target.value)} required maxLength={100} className="mt-2 h-11 w-full rounded-xl border border-zinc-300 px-3 font-normal outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-100" placeholder="Ex.: Mobilidade no dia a dia" />
+                <input autoFocus value={nome} onChange={(event) => setNome(event.target.value)} required maxLength={100} className="mt-2 h-11 w-full rounded-xl border border-zinc-300 px-3 font-normal outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-100" placeholder="Ex.: Mobilidade no dia a dia" />
               </label>
               <label className="block text-sm font-semibold text-zinc-800">
                 Tema
@@ -478,10 +464,9 @@ export default function Comunidades() {
 
       <AcaoGuiadaSoulie
         imagem={comunidadeSugerida ? avatarRadiante : avatarSorridente}
-        mensagem={mensagemAcaoSoulie}
-        rotuloAcao={rotuloAcaoSoulie}
-        onAcao={executarAcaoSoulie}
-        posicaoVertical="superior"
+        titulo="Explore os grupos"
+        passos={passosSoulie}
+        carregando={carregando}
       />
     </main>
   )
