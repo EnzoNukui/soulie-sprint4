@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import souliePaz from '../../assets/avatar/integrantes/soulie-paz.png'
@@ -16,6 +16,8 @@ export default function AcessoApp() {
   const [carregando, setCarregando] = useState(false)
   const [erro, setErro] = useState('')
   const [errosCampos, setErrosCampos] = useState<ErrosCampos>({})
+  const nomeRef = useRef<HTMLInputElement>(null)
+  const emailRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     document.title = 'Soulie | Acessar jornada'
@@ -41,7 +43,11 @@ export default function AcessoApp() {
     }
 
     setErrosCampos(novosErros)
-    if (Object.keys(novosErros).length > 0) return
+    if (Object.keys(novosErros).length > 0) {
+      if (novosErros.nomeUsuario) nomeRef.current?.focus()
+      else emailRef.current?.focus()
+      return
+    }
 
     setCarregando(true)
 
@@ -56,8 +62,8 @@ export default function AcessoApp() {
   }
 
   return (
-    <main className="relative flex min-h-screen items-center overflow-hidden bg-white px-5 pb-8 pt-24 text-zinc-900 sm:px-8 sm:pt-28">
-      <header className="absolute inset-x-0 top-0 mx-auto flex w-full max-w-[1360px] items-center justify-start px-5 py-6 sm:px-8 sm:py-7">
+    <main className="relative flex min-h-dvh items-center overflow-hidden bg-white px-4 pb-5 pt-20 text-zinc-900 sm:px-8 sm:pb-8 sm:pt-28">
+      <header className="absolute inset-x-0 top-0 mx-auto flex w-full max-w-340 items-center justify-start px-4 py-5 sm:px-8 sm:py-7">
         <Link
           to="/"
           className="inline-flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-semibold text-zinc-600 transition hover:text-violet-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
@@ -67,21 +73,22 @@ export default function AcessoApp() {
         </Link>
       </header>
 
-      <div className="relative mx-auto w-full max-w-[710px]">
-        <section className="relative z-10 w-full max-w-[710px] rounded-[1.5rem] border border-violet-200 bg-white px-7 py-9 shadow-[0_20px_55px_-42px_rgba(76,29,149,0.4)] sm:px-12 sm:py-10 lg:px-[68px] lg:py-9">
+      <div className="relative mx-auto w-full max-w-177.5">
+        <section className="relative z-10 w-full max-w-177.5 rounded-3xl border border-violet-200 bg-white px-5 py-6 shadow-[0_20px_55px_-42px_rgba(76,29,149,0.4)] sm:px-12 sm:py-10 lg:px-17 lg:py-9">
           <div className="text-center">
-            <Link to="/" className="text-[2.75rem] font-black leading-none tracking-tight text-violet-700">Soulie</Link>
-            <p className="mt-7 text-xs font-bold uppercase tracking-[0.2em] text-violet-700">Sua jornada</p>
-            <h1 className="mt-3 text-3xl font-black tracking-tight text-zinc-950 sm:text-[2.65rem]">Continue sua jornada</h1>
-            <p className="mt-3 text-sm leading-6 text-zinc-600 sm:text-base">
+            <Link to="/" className="text-4xl font-black leading-none tracking-tight text-violet-700 sm:text-[2.75rem]">Soulie</Link>
+            <p className="mt-5 text-xs font-bold uppercase tracking-[0.2em] text-violet-700 sm:mt-7">Sua jornada</p>
+            <h1 className="mt-3 text-2xl font-black tracking-tight text-zinc-950 sm:text-[2.65rem]">Continue sua jornada</h1>
+            <p className="mt-2 text-sm leading-5 text-zinc-600 sm:mt-3 sm:text-base sm:leading-6">
               Acesse seu espaço e acompanhe seus hábitos com a Soulie.
             </p>
           </div>
 
-          <form className="mt-8 space-y-5" onSubmit={acessar} noValidate>
+          <form className="mt-6 space-y-4 sm:mt-8 sm:space-y-5" onSubmit={acessar} noValidate>
             <div>
-              <label htmlFor="nomeUsuario" className="mb-2 block text-sm font-semibold text-zinc-800 sm:text-base">Nome</label>
+              <label htmlFor="nomeUsuario" className="mb-1.5 block text-sm font-semibold text-zinc-800 sm:mb-2 sm:text-base">Nome</label>
               <input
+                ref={nomeRef}
                 id="nomeUsuario"
                 name="nomeUsuario"
                 autoComplete="name"
@@ -96,7 +103,7 @@ export default function AcessoApp() {
                 aria-invalid={Boolean(errosCampos.nomeUsuario)}
                 aria-describedby={errosCampos.nomeUsuario ? 'erro-nome-usuario' : undefined}
                 placeholder="Seu nome"
-                className="h-14 w-full rounded-2xl border border-violet-200 bg-violet-50/20 px-5 text-base outline-none transition placeholder:text-zinc-500 focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
+                className={`h-12 w-full rounded-2xl border px-4 text-base outline-none transition placeholder:text-zinc-500 focus:ring-4 sm:h-14 sm:px-5 ${errosCampos.nomeUsuario ? 'border-rose-500 bg-rose-50/30 focus:border-rose-600 focus:ring-rose-100' : 'border-violet-200 bg-violet-50/20 focus:border-violet-500 focus:ring-violet-100'}`}
               />
               {errosCampos.nomeUsuario && (
                 <p id="erro-nome-usuario" role="alert" className="mt-2 text-sm text-rose-700">{errosCampos.nomeUsuario}</p>
@@ -104,8 +111,9 @@ export default function AcessoApp() {
             </div>
 
             <div>
-              <label htmlFor="email" className="mb-2 block text-sm font-semibold text-zinc-800 sm:text-base">E-mail</label>
+              <label htmlFor="email" className="mb-1.5 block text-sm font-semibold text-zinc-800 sm:mb-2 sm:text-base">E-mail</label>
               <input
+                ref={emailRef}
                 id="email"
                 name="email"
                 type="email"
@@ -120,7 +128,7 @@ export default function AcessoApp() {
                 aria-invalid={Boolean(errosCampos.email)}
                 aria-describedby={errosCampos.email ? 'erro-email-acesso' : undefined}
                 placeholder="seu@email.com"
-                className="h-14 w-full rounded-2xl border border-violet-200 bg-violet-50/20 px-5 text-base outline-none transition placeholder:text-zinc-500 focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
+                className={`h-12 w-full rounded-2xl border px-4 text-base outline-none transition placeholder:text-zinc-500 focus:ring-4 sm:h-14 sm:px-5 ${errosCampos.email ? 'border-rose-500 bg-rose-50/30 focus:border-rose-600 focus:ring-rose-100' : 'border-violet-200 bg-violet-50/20 focus:border-violet-500 focus:ring-violet-100'}`}
               />
               {errosCampos.email && (
                 <p id="erro-email-acesso" role="alert" className="mt-2 text-sm text-rose-700">{errosCampos.email}</p>
@@ -132,18 +140,18 @@ export default function AcessoApp() {
             <button
               type="submit"
               disabled={carregando}
-              className="inline-flex h-16 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-700 to-violet-600 px-5 text-base font-bold text-white shadow-sm transition hover:brightness-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 disabled:cursor-wait disabled:opacity-70 sm:text-lg"
+              className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-linear-to-r from-violet-700 to-violet-600 px-5 text-base font-bold text-white shadow-sm transition hover:brightness-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 disabled:cursor-wait disabled:opacity-70 sm:h-16 sm:text-lg"
             >
               {carregando ? 'Continuando...' : 'Continuar'}
             </button>
           </form>
-          <p className="mt-6 text-center text-sm leading-6 text-zinc-500">
+          <p className="mt-4 text-center text-xs leading-5 text-zinc-500 sm:mt-6 sm:text-sm sm:leading-6">
             Seu progresso fica salvo na sua jornada.
           </p>
         </section>
 
         <aside
-          className="pointer-events-none absolute left-0 top-1/2 z-20 hidden -translate-x-[85%] -translate-y-1/2 xl:block"
+          className="pointer-events-none absolute left-0 top-1/2 z-20 hidden translate-x-[-85%] -translate-y-1/2 xl:block"
           aria-label="Soulie acompanha seu acesso"
         >
           <img
