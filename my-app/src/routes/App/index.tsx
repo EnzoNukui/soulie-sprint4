@@ -85,11 +85,13 @@ export default function MissoesApp() {
 
     async function carregarMissoes() {
       try {
-        const [lista, listaParticipacoes, listaAtividades] = await Promise.all([
-          missaoService.listar(controller.signal),
-          missaoService.listarParticipacoesDoUsuario(usuario.idUsuario, controller.signal),
-          atividadeService.listarDoUsuario(usuario.idUsuario, controller.signal),
-        ])
+        const lista = await missaoService.listar(controller.signal)
+        if (controller.signal.aborted) return
+
+        const listaParticipacoes = await missaoService.listarParticipacoesDoUsuario(usuario.idUsuario, controller.signal)
+        if (controller.signal.aborted) return
+
+        const listaAtividades = await atividadeService.listarDoUsuario(usuario.idUsuario, controller.signal)
         if (controller.signal.aborted) return
 
         setMissoes(lista)

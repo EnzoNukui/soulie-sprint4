@@ -1,19 +1,14 @@
+import type { ComponentType } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import App from "../App";
-import LayoutApp from "../components/LayoutApp/LayoutApp";
-import AppSoulie from "./App";
-import AcessoApp from "./AcessoApp";
-import CadastroApp from "./CadastroApp";
-import Comunidades from "./Comunidades";
-import ComunidadeDetalhe from "./ComunidadeDetalhe";
-import Contato from "./Contato";
 import Error from "./Error";
-import Faq from "./Faq";
 import Home from "./Home";
-import Integrantes from "./Integrantes";
-import Sobre from "./Sobre";
-import Solucao from "./Solucao";
-import InicioApp from "./InicioApp";
+
+// Carrega cada página apenas quando a rota é acessada, reduzindo o bundle inicial.
+const carregar = (importar: () => Promise<{ default: ComponentType }>) => async () => {
+  const modulo = await importar();
+  return { Component: modulo.default };
+};
 
 const router = createBrowserRouter([
   {
@@ -27,60 +22,60 @@ const router = createBrowserRouter([
       },
       {
         path: "/sobre",
-        element: <Sobre />,
+        lazy: carregar(() => import("./Sobre")),
       },
       {
         path: "/solucao",
-        element: <Solucao />,
+        lazy: carregar(() => import("./Solucao")),
       },
       {
         path: "/integrantes",
-        element: <Integrantes />,
+        lazy: carregar(() => import("./Integrantes")),
       },
       {
         path: "/integrantes/:rm",
-        element: <Integrantes />,
+        lazy: carregar(() => import("./Integrantes")),
       },
       {
         path: "/contato",
-        element: <Contato />,
+        lazy: carregar(() => import("./Contato")),
       },
       {
         path: "/faq",
-        element: <Faq />,
+        lazy: carregar(() => import("./Faq")),
       },
     ],
   },
   {
     path: "/app/acesso",
-    element: <AcessoApp />,
+    lazy: carregar(() => import("./AcessoApp")),
     errorElement: <Error />,
   },
   {
     path: "/app/cadastro",
-    element: <CadastroApp />,
+    lazy: carregar(() => import("./CadastroApp")),
     errorElement: <Error />,
   },
   {
     path: "/app",
-    element: <LayoutApp />,
+    lazy: carregar(() => import("../components/LayoutApp/LayoutApp")),
     errorElement: <Error />,
     children: [
       {
         path: "/app",
-        element: <InicioApp />,
+        lazy: carregar(() => import("./InicioApp")),
       },
       {
         path: "/app/missoes",
-        element: <AppSoulie />,
+        lazy: carregar(() => import("./App")),
       },
       {
         path: "/app/comunidades",
-        element: <Comunidades />,
+        lazy: carregar(() => import("./Comunidades")),
       },
       {
         path: "/app/comunidades/:id",
-        element: <ComunidadeDetalhe />,
+        lazy: carregar(() => import("./ComunidadeDetalhe")),
       },
     ],
   },

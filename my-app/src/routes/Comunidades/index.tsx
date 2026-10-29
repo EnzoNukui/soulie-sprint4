@@ -118,18 +118,28 @@ export default function Comunidades() {
     const idsDaLista = comunidades.map((comunidade) => comunidade.idComunidade).sort((a, b) => a - b).join(',')
 
     async function carregarQuantidades() {
-      const resultados = await Promise.all(comunidades.map(async (comunidade) => {
+      for (const comunidade of comunidades) {
+        if (controller.signal.aborted) return
+
         try {
           const participantes = await comunidadeService.listarParticipantes(comunidade.idComunidade, controller.signal)
-          return [comunidade.idComunidade, participantes.length] as const
+          if (controller.signal.aborted) return
+          setQuantidadesMembros((quantidadesAtuais) => ({
+            ...quantidadesAtuais,
+            [comunidade.idComunidade]: participantes.length,
+          }))
         } catch (erro) {
-          if (erro instanceof ApiError && erro.status === 404) return [comunidade.idComunidade, 0] as const
-          return null
+          if (controller.signal.aborted) return
+          if (erro instanceof ApiError && erro.status === 404) {
+            setQuantidadesMembros((quantidadesAtuais) => ({
+              ...quantidadesAtuais,
+              [comunidade.idComunidade]: 0,
+            }))
+          }
         }
-      }))
+      }
 
       if (controller.signal.aborted) return
-      setQuantidadesMembros(Object.fromEntries(resultados.filter((resultado): resultado is readonly [number, number] => resultado !== null)))
       setIdsComunidadesContadas(idsDaLista)
     }
 

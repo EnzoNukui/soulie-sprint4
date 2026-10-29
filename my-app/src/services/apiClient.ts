@@ -1,5 +1,8 @@
 const API_URL = import.meta.env.VITE_API_URL?.replace(/\/+$/, '')
 
+// A API no Render pode levar alguns segundos para "acordar"; após esse limite a requisição é cancelada.
+const TEMPO_LIMITE_MS = 60_000
+
 export class ApiError extends Error {
   public readonly status: number
 
@@ -34,14 +37,21 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}): Promi
     headers.set('Content-Type', 'application/json')
   }
 
+  const sinalTempoLimite = AbortSignal.timeout(TEMPO_LIMITE_MS)
+  const signal = init.signal ? AbortSignal.any([init.signal, sinalTempoLimite]) : sinalTempoLimite
+
   let response: Response
   try {
     response = await fetch(`${API_URL}${path.startsWith('/') ? path : `/${path}`}`, {
       ...init,
       headers,
+      signal,
       ...(method === 'GET' ? { cache: init.cache ?? 'no-store' } : {}),
     })
   } catch (error) {
+    if (sinalTempoLimite.aborted && !init.signal?.aborted) {
+      throw new Error('A API demorou demais para responder. Tente novamente em alguns instantes.')
+    }
     if (error instanceof DOMException && error.name === 'AbortError') throw error
     throw new Error('Não foi possível conectar à API. Verifique sua conexão e tente novamente.')
   }
