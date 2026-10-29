@@ -1,9 +1,11 @@
-import { ArrowRight, Check } from 'lucide-react'
+import { ArrowRight, Check, Users } from 'lucide-react'
 import type { Comunidade, UsuarioComunidade } from '../../types/api'
 
 interface CardComunidadeProps {
   comunidade: Comunidade
   capa: string
+  quantidadeMembros?: number
+  carregandoMembros?: boolean
   participacao?: UsuarioComunidade
   entrando: boolean
   saindo: boolean
@@ -16,6 +18,8 @@ interface CardComunidadeProps {
 export default function CardComunidade({
   comunidade,
   capa,
+  quantidadeMembros,
+  carregandoMembros = false,
   participacao,
   entrando,
   saindo,
@@ -43,6 +47,12 @@ export default function CardComunidade({
           {comunidade.nome}
         </button>
         <p className="mt-1 text-sm text-zinc-600">Um espaço para trocar ideias sobre {comunidade.tema.toLowerCase()}.</p>
+        <p className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500" aria-label={quantidadeMembros === undefined ? 'Quantidade de membros indisponível' : `${quantidadeMembros} ${quantidadeMembros === 1 ? 'membro' : 'membros'}`}>
+          <Users aria-hidden="true" className="h-4 w-4" />
+          {quantidadeMembros !== undefined
+            ? `${quantidadeMembros} ${quantidadeMembros === 1 ? 'membro' : 'membros'}`
+            : carregandoMembros ? 'Carregando membros...' : 'Membros indisponíveis'}
+        </p>
         {participacao && <span className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-800"><Check aria-hidden="true" className="h-4 w-4" /> Você participa</span>}
         <div className="mt-4 grid grid-cols-2 gap-2">
           <button type="button" onClick={abrir} className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl border border-violet-200 bg-violet-50 px-3 py-2 text-xs font-bold text-violet-800 transition hover:bg-violet-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">

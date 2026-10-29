@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { Check, Plus, Search, X } from 'lucide-react'
+import { Check, Plus, Search, Users, X } from 'lucide-react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import avatarRadiante from '../../assets/avatar/expressoes/avatar_radiante.png'
 import avatarSorridente from '../../assets/avatar/expressoes/avatar_sorridente.png'
@@ -9,6 +9,7 @@ import CardComunidade from '../../components/CardComunidade/CardComunidade'
 import EmptyState from '../../components/EmptyState/EmptyState'
 import ErrorState from '../../components/ErrorState/ErrorState'
 import LoadingState from '../../components/LoadingState/LoadingState'
+import { ApiError } from '../../services/apiClient'
 import { comunidadeService } from '../../services/comunidadeService'
 import type { Comunidade, Usuario, UsuarioComunidade } from '../../types/api'
 
@@ -64,6 +65,8 @@ export default function Comunidades() {
   const usuario = useOutletContext<Usuario>()
   const [comunidades, setComunidades] = useState<Comunidade[]>([])
   const [minhasParticipacoes, setMinhasParticipacoes] = useState<UsuarioComunidade[]>([])
+  const [quantidadesMembros, setQuantidadesMembros] = useState<Record<number, number>>({})
+  const [idsComunidadesContadas, setIdsComunidadesContadas] = useState('')
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
   const [tentativa, setTentativa] = useState(0)
@@ -106,6 +109,35 @@ export default function Comunidades() {
     void carregarComunidades()
     return () => controller.abort()
   }, [tentativa, usuario.idUsuario])
+
+  useEffect(() => {
+    if (comunidades.length === 0) return
+
+    const controller = new AbortController()
+    const idsDaLista = comunidades.map((comunidade) => comunidade.idComunidade).sort((a, b) => a - b).join(',')
+
+    async function carregarQuantidades() {
+      const resultados = await Promise.all(comunidades.map(async (comunidade) => {
+        try {
+          const participantes = await comunidadeService.listarParticipantes(comunidade.idComunidade, controller.signal)
+          return [comunidade.idComunidade, participantes.length] as const
+        } catch (erro) {
+          if (erro instanceof ApiError && erro.status === 404) return [comunidade.idComunidade, 0] as const
+          return null
+        }
+      }))
+
+      if (controller.signal.aborted) return
+      setQuantidadesMembros(Object.fromEntries(resultados.filter((resultado): resultado is readonly [number, number] => resultado !== null)))
+      setIdsComunidadesContadas(idsDaLista)
+    }
+
+    void carregarQuantidades()
+    return () => controller.abort()
+  }, [comunidades])
+
+  const idsComunidadesAtuais = comunidades.map((comunidade) => comunidade.idComunidade).sort((a, b) => a - b).join(',')
+  const carregandoQuantidades = comunidades.length > 0 && idsComunidadesContadas !== idsComunidadesAtuais
 
   const participacoesPorComunidade = useMemo(
     () => new Map(minhasParticipacoes.map((participacao) => [participacao.idComunidade, participacao])),
@@ -185,6 +217,9 @@ export default function Comunidades() {
         ...atuais.filter((item) => item.idComunidade !== participacao.idComunidade),
         participacao,
       ])
+      setQuantidadesMembros((atuais) => comunidade.idComunidade in atuais
+        ? { ...atuais, [comunidade.idComunidade]: atuais[comunidade.idComunidade] + 1 }
+        : atuais)
       setAviso('Você entrou na comunidade “' + comunidade.nome + '”.')
     } catch (erroParticipacao) {
       setErroAcao(mensagemErro(erroParticipacao, 'Não foi possível entrar nesta comunidade. Tente novamente.'))
@@ -201,6 +236,9 @@ export default function Comunidades() {
     try {
       await comunidadeService.sair(usuario.idUsuario, comunidade.idComunidade)
       setMinhasParticipacoes((atuais) => atuais.filter((item) => item.idComunidade !== comunidade.idComunidade))
+      setQuantidadesMembros((atuais) => comunidade.idComunidade in atuais
+        ? { ...atuais, [comunidade.idComunidade]: Math.max(0, atuais[comunidade.idComunidade] - 1) }
+        : atuais)
       setAviso('Você saiu da comunidade “' + comunidade.nome + '”.')
     } catch (erroSaida) {
       setErroAcao(mensagemErro(erroSaida, 'Não foi possível sair desta comunidade. Tente novamente.'))
@@ -227,6 +265,7 @@ export default function Comunidades() {
         tema: tema.trim(),
       })
       setComunidades((atuais) => [novaComunidade, ...atuais])
+      setQuantidadesMembros((atuais) => ({ ...atuais, [novaComunidade.idComunidade]: 0 }))
       setNome('')
       setTema('')
       setAbrirCriacao(false)
@@ -302,6 +341,7 @@ export default function Comunidades() {
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-bold text-zinc-900">{comunidade.nome}</p>
                     <p className="truncate text-xs text-zinc-500">{comunidade.tema}</p>
+                    <p className="mt-1 inline-flex items-center gap-1 text-[11px] text-zinc-500"><Users aria-hidden="true" className="h-3 w-3" />{quantidadesMembros[comunidade.idComunidade] !== undefined ? `${quantidadesMembros[comunidade.idComunidade]} ${quantidadesMembros[comunidade.idComunidade] === 1 ? 'membro' : 'membros'}` : carregandoQuantidades ? 'Carregando membros...' : 'Membros indisponíveis'}</p>
                   </div>
                   <button type="button" onClick={() => void participar(comunidade)} disabled={idEntrando !== null} className="shrink-0 rounded-lg px-2 py-2 text-xs font-bold text-violet-700 transition hover:bg-violet-50 disabled:opacity-50">
                     {idEntrando === comunidade.idComunidade ? 'Entrando...' : 'Participar'}
@@ -328,6 +368,8 @@ export default function Comunidades() {
                 <CardComunidade
                   comunidade={comunidade}
                   capa={capaDaComunidade(comunidade)}
+                  quantidadeMembros={quantidadesMembros[comunidade.idComunidade]}
+                  carregandoMembros={carregandoQuantidades}
                   participacao={participacoesPorComunidade.get(comunidade.idComunidade)}
                   entrando={false}
                   saindo={idSaindo === comunidade.idComunidade}
@@ -380,6 +422,8 @@ export default function Comunidades() {
                   <CardComunidade
                     comunidade={comunidade}
                     capa={capaDaComunidade(comunidade)}
+                    quantidadeMembros={quantidadesMembros[comunidade.idComunidade]}
+                    carregandoMembros={carregandoQuantidades}
                     entrando={idEntrando === comunidade.idComunidade}
                     saindo={false}
                     abrir={() => abrirDetalhes(comunidade.idComunidade)}
