@@ -239,9 +239,6 @@ A página Contato oferece um formulário para dúvidas, problemas técnicos, sug
 
 Envie dúvidas, sugestões e relatos pelo [formulário de contato da Soulie](https://soulie-sprint4.vercel.app/contato). Para questões sobre o código, use as [Issues do repositório](https://github.com/EnzoNukui/soulie-sprint4/issues).
 
-## Orientações para a entrega
-
-O PDF da Sprint 4 exige um vídeo de até **3 minutos** no YouTube, pelo menos **5 commits por integrante** e **15 commits no projeto**, além de um único ZIP enviado pelo **Portal do Aluno**. O ZIP deve conter o projeto e este README, ter até **50 MB** e não incluir `node_modules`.
 
 ## Licença
 
