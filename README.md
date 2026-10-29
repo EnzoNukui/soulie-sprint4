@@ -33,7 +33,7 @@ A URL base utilizada pelo front-end para a API é **https://soulie-java.onrender
 ### Navegação pelo projeto
 
 1. Abra a [página inicial](https://soulie-sprint4.vercel.app/) para conhecer a proposta da Soulie, a equipe e as páginas informativas.
-2. Acesse [Sua jornada](https://soulie-sprint4.vercel.app/app/acesso), informe nome e e-mail e escolha **Continuar**. O aplicativo consulta o usuário na API Java e, se o e-mail ainda não estiver cadastrado, cria o registro. A jornada é recuperada nas visitas seguintes pelo identificador salvo no navegador.
+2. Acesse [Entrar](https://soulie-sprint4.vercel.app/app/acesso) com um e-mail já cadastrado ou escolha [Cadastrar](https://soulie-sprint4.vercel.app/app/cadastro) para criar uma jornada informando nome e e-mail. A jornada é recuperada nas visitas seguintes pelo identificador salvo no navegador.
 3. No aplicativo, acompanhe o resumo da jornada em **Início**, explore e crie **Missões**, registre ações do dia e participe de **Comunidades**. O espaço de publicações permite compartilhar, editar e excluir as próprias mensagens.
 4. Para dúvidas ou sugestões, use o [formulário de contato](https://soulie-sprint4.vercel.app/contato). Seu envio usa EmailJS, configurado separadamente da API Java.
 
@@ -41,7 +41,7 @@ A URL base utilizada pelo front-end para a API é **https://soulie-java.onrender
 
 - **Site público:** Home, Sobre, Solução, Integrantes, FAQ e Contato, com navegação sem recarregamento completo.
 - **Páginas da solução:** o conteúdo de Solução explica a proposta; o aplicativo permite percorrer uma jornada funcional de missões e comunidades.
-- **Acesso à jornada:** consulta ou cadastro de usuário pela API Java, recuperação da sessão e opção de sair.
+- **Acesso à jornada:** telas separadas para entrar com e-mail existente e cadastrar novo usuário pela API Java, com recuperação da sessão e opção de sair.
 - **Missões:** listagem, detalhes, criação, participação e registro de atividades, com acompanhamento do progresso.
 - **Comunidades:** listagem, pesquisa, detalhes, criação e participação ou saída.
 - **Publicações:** feed com dados da API, criação, edição e exclusão pelo autor.
@@ -63,12 +63,15 @@ A URL base utilizada pelo front-end para a API é **https://soulie-java.onrender
 | --- | --- |
 | `/`, `/sobre`, `/solucao`, `/faq`, `/contato` | Páginas públicas do site |
 | `/integrantes` e `/integrantes/:rm` | Equipe e perfil individual por RM |
-| `/app/acesso` | Entrada na jornada |
+| `/app/acesso` | Entrada de usuário já cadastrado |
+| `/app/cadastro` | Cadastro de nova jornada |
 | `/app` | Resumo da jornada |
 | `/app/missoes` | Missões e atividades |
 | `/app/comunidades` e `/app/comunidades/:id` | Comunidades e seus detalhes |
 
 As rotas do aplicativo redirecionam para `/app/acesso` quando não há jornada recuperável. Identificadores inválidos recebem tratamento na interface.
+
+O fluxo de entrada consulta o e-mail cadastrado e o cadastro cria o usuário em uma ação separada. A API atual não oferece senha; portanto, a identificação por e-mail não constitui autenticação de segurança.
 
 ## Integração com a API Java
 

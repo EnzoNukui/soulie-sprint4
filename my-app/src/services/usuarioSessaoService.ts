@@ -5,16 +5,21 @@ import type { Usuario } from '../types/api'
 const CHAVE_JORNADA = 'soulie.identificadorJornada'
 
 export const usuarioSessaoService = {
-  async acessar(nomeUsuario: string, email: string): Promise<Usuario> {
-    let usuario: Usuario
+  async entrar(email: string): Promise<Usuario> {
+    const usuario = await usuarioService.buscarPorEmail(email)
+    localStorage.setItem(CHAVE_JORNADA, usuario.identificadorJornada)
+    return usuario
+  },
 
+  async cadastrar(nomeUsuario: string, email: string): Promise<Usuario> {
     try {
-      usuario = await usuarioService.buscarPorEmail(email)
+      await usuarioService.buscarPorEmail(email)
+      throw new Error('Este e-mail já tem uma jornada cadastrada. Use a opção Entrar.')
     } catch (error) {
       if (!(error instanceof ApiError) || error.status !== 404) throw error
-      usuario = await usuarioService.cadastrar({ nomeUsuario, email })
     }
 
+    const usuario = await usuarioService.cadastrar({ nomeUsuario, email })
     localStorage.setItem(CHAVE_JORNADA, usuario.identificadorJornada)
     return usuario
   },
