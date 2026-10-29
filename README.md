@@ -1,275 +1,146 @@
-# Soulie - sua companheira inteligente na SoulUp 🌱
+# Soulie | Front-end Design Engineering — Sprint 4
 
-A Soulie é um avatar gamificado e interativo criado para acompanhar os usuários da SoulUp, incentivar a continuidade das ações sustentáveis e tornar a jornada dentro da plataforma mais próxima, clara e recompensadora.
+<p align="center">
+  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&amp;logo=react&amp;logoColor=61DAFB" alt="React">
+  <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&amp;logo=vite&amp;logoColor=white" alt="Vite">
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&amp;logo=typescript&amp;logoColor=white" alt="TypeScript">
+  <img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&amp;logo=tailwindcss&amp;logoColor=white" alt="Tailwind CSS">
+  <br>
+  <img src="https://img.shields.io/badge/React_Router-CA4245?style=for-the-badge&amp;logo=reactrouter&amp;logoColor=white" alt="React Router">
+  <img src="https://img.shields.io/badge/React_Hook_Form-EC5990?style=for-the-badge&amp;logo=reacthookform&amp;logoColor=white" alt="React Hook Form">
+  <img src="https://img.shields.io/badge/Lucide-111827?style=for-the-badge&amp;logo=lucide&amp;logoColor=white" alt="Lucide">
+  <img src="https://img.shields.io/badge/API_Java-ED8B00?style=for-the-badge&amp;logo=openjdk&amp;logoColor=white" alt="API Java">
+  <img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&amp;logo=vercel&amp;logoColor=white" alt="Vercel">
+</p>
 
-Este repositório contém a entrega de **Front-end Design Engineering da Sprint 03**, desenvolvida como uma **Single Page Application (SPA)** com React, Vite e TypeScript.
+A **Soulie** é uma companheira digital da SoulUp que transforma ações sustentáveis em uma jornada com missões, progresso e comunidades. O projeto busca incentivar a continuidade dos hábitos e aproximar as pessoas da proposta da plataforma.
 
-## 🔗 Links do projeto
+Nesta Sprint 4, o site e o aplicativo formam uma **SPA em React, Vite e TypeScript**. O aplicativo consome a **API REST desenvolvida em Java pelo grupo** para consultar e registrar dados reais. A interface usa Tailwind CSS e se adapta a celular, tablet e desktop.
 
-- **Repositório no GitHub:** [github.com/EnzoNukui/soulie-sprint3](https://github.com/EnzoNukui/soulie-sprint3)
-- **Aplicação publicada:** [soulie-sprint3.vercel.app](https://soulie-sprint3.vercel.app/)
-- **Vídeo de apresentação:** [assistir no YouTube](https://youtu.be/nqB3IUTKXAY?si=EOsZCH2BwNNibNlt)
+## Como usar
 
+### Links da entrega
 
-## 📌 Sobre o projeto
+| Recurso | Endereço |
+| --- | --- |
+| Repositório do front-end | [EnzoNukui/soulie-sprint4](https://github.com/EnzoNukui/soulie-sprint4) |
+| Aplicação publicada na Vercel | [soulie-sprint4.vercel.app](https://soulie-sprint4.vercel.app/) |
+| API Java publicada | [soulie-java.onrender.com/missoes](https://soulie-java.onrender.com/missoes) |
+| Vídeo de apresentação | [Assistir no YouTube](https://youtu.be/nqB3IUTKXAY?si=EOsZCH2BwNNibNlt) |
 
-A **Soulie** é a solução desenvolvida para o Challenge 2026 em parceria com a **SoulUp**. A proposta busca reduzir a queda de retenção dos usuários por meio de uma experiência mais envolvente dentro da plataforma.
+A URL base utilizada pelo front-end para a API é **https://soulie-java.onrender.com**.
 
-O avatar acompanha o progresso do usuário e reage com diferentes expressões e mensagens. A solução combina onboarding, missões personalizadas, progresso, recompensas e recorrência de uso para ajudar a transformar pequenas ações sustentáveis em hábitos duradouros.
+### Navegação pelo projeto
 
-Na Sprint 03, as páginas produzidas anteriormente foram migradas para uma aplicação moderna, componentizada e responsiva. A navegação ocorre sem recarregamento completo da página e os componentes compartilhados mantêm a identidade visual consistente em toda a experiência.
+1. Abra a [página inicial](https://soulie-sprint4.vercel.app/) para conhecer a proposta da Soulie, a equipe e as páginas informativas.
+2. Acesse [Entrar](https://soulie-sprint4.vercel.app/app/acesso) com um e-mail já cadastrado ou escolha [Cadastrar](https://soulie-sprint4.vercel.app/app/cadastro) para criar uma jornada informando nome e e-mail. A jornada é recuperada nas visitas seguintes pelo identificador salvo no navegador.
+3. No aplicativo, acompanhe o resumo da jornada em **Início**, explore e crie **Missões**, registre ações do dia e participe de **Comunidades**. O espaço de publicações permite compartilhar, editar e excluir as próprias mensagens.
+4. Para dúvidas ou sugestões, use o [formulário de contato](https://soulie-sprint4.vercel.app/contato). Seu envio usa EmailJS, configurado separadamente da API Java.
 
-## ✨ Funcionalidades implementadas
+## Funcionalidades
 
-- Navegação SPA entre Home, Sobre, Solução, Integrantes, FAQ e Contato.
-- Rota dinâmica para o perfil individual de cada integrante por meio do RM.
-- Cabeçalho fixo e menu responsivo para dispositivos móveis, tablets e desktops.
-- Estados da Soulie controlados por rolagem e também selecionáveis por clique.
-- Seções animadas de apresentação, progresso e funcionamento da solução.
-- Formulário de contato tipado, com validações e mensagens de erro claras.
-- Componentes reutilizáveis para botões, cards, conteúdo, menu, cabeçalho e rodapé.
-- Página de erro para rotas inexistentes.
-- Vídeo de animação da Soulie integrado à chamada final da Home.
+- **Site público:** Home, Sobre, Solução, Integrantes, FAQ e Contato, com navegação sem recarregamento completo.
+- **Páginas da solução:** o conteúdo de Solução explica a proposta; o aplicativo permite percorrer uma jornada funcional de missões e comunidades.
+- **Acesso à jornada:** telas separadas para entrar com e-mail existente e cadastrar novo usuário pela API Java, com recuperação da sessão e opção de sair.
+- **Missões:** listagem, detalhes, criação, participação e registro de atividades, com acompanhamento do progresso.
+- **Comunidades:** listagem, pesquisa, detalhes, criação e participação ou saída.
+- **Publicações:** feed com dados da API, criação, edição e exclusão pelo autor.
+- **Contato:** formulário validado com envio por e-mail e retorno de sucesso ou erro.
+- **Estados de interface:** mensagens de carregamento, erro e ausência de dados nas consultas relevantes.
 
-## ✅ Requisitos da Sprint 03 atendidos
+### Da Sprint 3 para a Sprint 4
 
-| Critério                  | Implementação no projeto                                                                                       |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| React + Vite + TypeScript | Aplicação criada com Vite, páginas convertidas em componentes React e código tipado com TypeScript.            |
-| SPA com React Router      | Navegação configurada com `createBrowserRouter`, `RouterProvider` e `Outlet`.                                  |
-| Rotas estáticas           | Rotas para Home, Sobre, Solução, Integrantes, FAQ e Contato.                                                   |
-| Rota dinâmica             | Perfil individual disponível em `/integrantes/:rm`, usando o RM como parâmetro.                                |
-| Componentização e props   | Componentes reutilizáveis como `Cabecalho`, `Menu`, `Rodape`, `Botao`, `Cards`, `Conteudo` e `CardIntegrante`. |
-| Hooks do React            | Uso de `useState` e `useEffect` em diferentes páginas e componentes.                                           |
-| Navegação e parâmetros    | Uso de `useNavigate` e `useParams` nos fluxos de navegação.                                                    |
-| Tailwind CSS              | Interface estilizada com Tailwind e adaptada para mobile, tablet e desktop.                                    |
-| React Hook Form           | Formulário de contato com `useForm`, tipagem, campos obrigatórios e mensagens de validação.                    |
-| Git e GitHub              | Desenvolvimento versionado com branches e commits significativos por integrante.                               |
+| Base construída na Sprint 3 | Evolução nesta entrega |
+| --- | --- |
+| Site institucional em SPA, com páginas públicas e perfis por RM | Aplicativo integrado ao site, com início, missões e comunidades |
+| Formulário de contato com validação local | Envio real de mensagens por e-mail, com resposta de sucesso ou erro |
+| Demonstração visual da solução | Leitura e escrita de dados reais pela API Java publicada |
+| Layout responsivo com Tailwind CSS | Navegação própria do aplicativo, estados de carregamento, erro e lista vazia |
 
-> Conforme a orientação da Sprint 03, o projeto não realiza consumo de API.
+### Rotas principais
 
-## 🛠️ Tecnologias utilizadas
+| Caminho | Página |
+| --- | --- |
+| `/`, `/sobre`, `/solucao`, `/faq`, `/contato` | Páginas públicas do site |
+| `/integrantes` e `/integrantes/:rm` | Equipe e perfil individual por RM |
+| `/app/acesso` | Entrada de usuário já cadastrado |
+| `/app/cadastro` | Cadastro de nova jornada |
+| `/app` | Resumo da jornada |
+| `/app/missoes` | Missões e atividades |
+| `/app/comunidades` e `/app/comunidades/:id` | Comunidades e seus detalhes |
 
-- **React** - construção da interface e dos componentes.
-- **Vite** - ambiente de desenvolvimento e build da aplicação.
-- **TypeScript** - tipagem de componentes, propriedades, eventos e formulários.
-- **Tailwind CSS** - estilização e responsividade da interface.
-- **React Router DOM** - rotas estáticas, rota dinâmica e navegação SPA.
-- **React Hook Form** - controle e validação do formulário de contato.
-- **Lucide React** - ícones utilizados na interface.
-- **Git e GitHub** - versionamento e colaboração da equipe.
-- **Vercel** - publicação e acesso à versão atual do projeto.
+As rotas do aplicativo redirecionam para `/app/acesso` quando não há jornada recuperável. Identificadores inválidos recebem tratamento na interface.
 
-## 📁 Estrutura de pastas
+O fluxo de entrada consulta o e-mail cadastrado e o cadastro cria o usuário em uma ação separada. A API atual não oferece senha; portanto, a identificação por e-mail não constitui autenticação de segurança.
+
+## Integração com a API Java
+
+O cliente HTTP em `my-app/src/services/apiClient.ts` usa **fetch**, adiciona os cabeçalhos necessários e centraliza o tratamento de falhas. As operações ficam em arquivos de `src/services/`, enquanto os contratos de dados são tipados em `src/types/api.ts`.
+
+| Operação exigida | Exemplo implementado | Uso na interface |
+| --- | --- | --- |
+| Leitura de lista | `GET /missoes`, `GET /comunidades`, `GET /postagens` | Missões, comunidades e feed |
+| Leitura de detalhe | `GET /missoes/:id`, `GET /comunidades/:id` | Detalhes da missão e da comunidade |
+| Escrita | `POST /usuarios`, `POST /atividades`, `POST /postagens` | Cadastro, registro de ação e publicação |
+| Atualização e exclusão | `PUT /postagens/:id`, `DELETE /postagens/:id` | Edição e remoção de publicações |
+
+Também há operações de participação em missões e comunidades. O aplicativo apresenta estados de carregamento, erro e lista vazia, com opção de tentar novamente em consultas que falham. O **EmailJS atende apenas ao formulário de contato**; a integração avaliada com o backend e o banco de dados ocorre pela API Java.
+
+## Tecnologias utilizadas
+
+| Tecnologia | Uso no projeto |
+| --- | --- |
+| React + Vite | Componentes e compilação da SPA |
+| TypeScript | Interfaces, tipos de domínio e validação do código |
+| React Router DOM | Rotas estáticas, rotas dinâmicas e navegação |
+| Tailwind CSS | Estilização e responsividade |
+| React Hook Form | Controle e validação do formulário de contato |
+| Fetch API | Requisições HTTP à API Java e ao EmailJS |
+| Lucide React | Ícones da interface |
+| Vercel | Publicação do front-end |
+| API Java | Dados persistidos e operações da jornada |
+| EmailJS | Encaminhamento das mensagens de contato por e-mail |
+
+## Estrutura de pastas
 
 ```text
-soulie-sprint3/
-├── my-app/
-│   ├── public/
-│   │   └── favicon/
-│   ├── src/
-│   │   ├── assets/
-│   │   │   ├── avatar/
-│   │   │   │   ├── expressoes/
-│   │   │   │   ├── historia/
-│   │   │   │   └── integrantes/
-│   │   │   ├── integrantes/
-│   │   │   └── produto/
-│   │   ├── components/
-│   │   │   ├── Botoes/
-│   │   │   ├── Cabecalho/
-│   │   │   ├── CardIntegrantes/
-│   │   │   ├── Cards/
-│   │   │   ├── Conteudo/
-│   │   │   ├── Menu/
-│   │   │   └── Rodape/
-│   │   ├── routes/
-│   │   │   ├── Contato/
-│   │   │   ├── Error/
-│   │   │   ├── Faq/
-│   │   │   ├── Home/
-│   │   │   ├── Integrantes/
-│   │   │   ├── Sobre/
-│   │   │   ├── Solucao/
-│   │   │   └── Routes.tsx
-│   │   ├── App.tsx
-│   │   ├── globals.css
-│   │   └── main.tsx
-│   ├── index.html
-│   ├── package.json
-│   ├── tsconfig.json
-│   └── vite.config.ts
-└── README.md
+soulie-sprint4/
+├── README.md
+└── my-app/
+    ├── .env.example            # nomes das variáveis de ambiente
+    ├── public/                 # arquivos estáticos
+    ├── src/
+    │   ├── assets/            # imagens, avatares e vídeo
+    │   ├── components/        # interface reutilizável
+    │   ├── routes/            # páginas e configuração de rotas
+    │   ├── services/          # comunicação com API Java e EmailJS
+    │   ├── types/             # contratos TypeScript
+    │   ├── App.tsx
+    │   ├── globals.css
+    │   └── main.tsx
+    ├── index.html
+    ├── package.json
+    ├── package-lock.json
+    ├── tsconfig.json
+    ├── vercel.json
+    └── vite.config.ts
 ```
 
-## 🎭 Imagens e ícones do projeto
+### Executar localmente
 
-A Soulie possui diferentes expressões para comunicar o estado da jornada e tornar a interação mais humana.
-
-| Expressão  | Imagem                                                                                                     | Aplicação                           |
-| ---------- | ---------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| Feliz      | <img src="./my-app/src/assets/avatar/expressoes/avatar_feliz.png" alt="Soulie feliz" width="60">           | Conclusão de missões.               |
-| Radiante   | <img src="./my-app/src/assets/avatar/expressoes/avatar_radiante.png" alt="Soulie radiante" width="60">     | Marcos de progresso e recorrência.  |
-| Sorridente | <img src="./my-app/src/assets/avatar/expressoes/avatar_sorridente.png" alt="Soulie sorridente" width="60"> | Evolução positiva na jornada.       |
-| Bravo      | <img src="./my-app/src/assets/avatar/expressoes/avatar_bravo.png" alt="Soulie brava" width="60">           | Interrupção de sequência ou alerta. |
-| Triste     | <img src="./my-app/src/assets/avatar/expressoes/avatar_triste.png" alt="Soulie triste" width="60">         | Longos períodos de inatividade.     |
-| Entediado  | <img src="./my-app/src/assets/avatar/expressoes/avatar_entediado.png" alt="Soulie entediada" width="60">   | Inatividade moderada.               |
-| Tímido     | <img src="./my-app/src/assets/avatar/expressoes/avatar_timido.png" alt="Soulie tímida" width="60">         | Onboarding e primeiras interações.  |
-| Com dúvida | <img src="./my-app/src/assets/avatar/expressoes/avatar_duvida.png" alt="Soulie com dúvida" width="60">     | Ajuda e orientação ao usuário.      |
-| Com pressa | <img src="./my-app/src/assets/avatar/expressoes/avatar_com_pressa.png" alt="Soulie com pressa" width="60"> | Lembretes e urgência de missões.    |
-
-O projeto também utiliza ilustrações da Soulie em diferentes poses, fotografias dos integrantes, imagens de apresentação da solução e uma animação em vídeo na Home.
-
-## 📸 Páginas do site e evolução visual
-
-### 🏠 Home
-
-A página inicial apresenta a Soulie, os pilares da solução, a proposta de valor e chamadas para conhecer o projeto.
-
-|                                               Antes                                                |                                            Depois                                             |
-| :------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------: |
-| <img src="./my-app/src/assets/produto/home-antigo.png" alt="Versão anterior da Home" width="100%"> | <img src="./my-app/src/assets/produto/home-novo.png" alt="Versão atual da Home" width="100%"> |
-
-### 🛰️ Sobre
-
-A página Sobre apresenta a origem da Soulie, suas expressões e a trajetória de acompanhamento do usuário.
-
-|                                                    Antes                                                    |                                                 Depois                                                 |
-| :---------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------: |
-| <img src="./my-app/src/assets/produto/sobre-antigo.png" alt="Versão anterior da página Sobre" width="100%"> | <img src="./my-app/src/assets/produto/sobre-novo.png" alt="Versão atual da página Sobre" width="100%"> |
-
-### ⚙️ Solução
-
-A página Solução explica como missões, pontos, comunidades e recompensas transformam sustentabilidade em hábito.
-
-|                                                      Antes                                                      |                                                   Depois                                                   |
-| :-------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------: |
-| <img src="./my-app/src/assets/produto/solucao-antigo.png" alt="Versão anterior da página Solução" width="100%"> | <img src="./my-app/src/assets/produto/solucao-novo.png" alt="Versão atual da página Solução" width="100%"> |
-
-### 👥 Integrantes
-
-A página Integrantes apresenta a equipe e permite acessar perfis individuais por uma rota dinâmica baseada no RM.
-
-|                                                          Antes                                                          |                                                       Depois                                                       |
-| :---------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------: |
-| <img src="./my-app/src/assets/produto/integrantes-antigo.png" alt="Versão anterior da página Integrantes" width="100%"> | <img src="./my-app/src/assets/produto/integrantes-novo.png" alt="Versão atual da página Integrantes" width="100%"> |
-
-### ❓ FAQ
-
-A página FAQ reúne as principais dúvidas sobre a Soulie em perguntas expansíveis.
-
-|                                                  Antes                                                  |                                               Depois                                               |
-| :-----------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------: |
-| <img src="./my-app/src/assets/produto/faq-antigo.png" alt="Versão anterior da página FAQ" width="100%"> | <img src="./my-app/src/assets/produto/faq-novo.png" alt="Versão atual da página FAQ" width="100%"> |
-
-### ✉️ Contato
-
-A página Contato disponibiliza um formulário validado para dúvidas, problemas técnicos, sugestões e feedbacks.
-
-|                                                      Antes                                                      |                                                   Depois                                                   |
-| :-------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------: |
-| <img src="./my-app/src/assets/produto/contato-antigo.png" alt="Versão anterior da página Contato" width="100%"> | <img src="./my-app/src/assets/produto/contato-novo.png" alt="Versão atual da página Contato" width="100%"> |
-
-## 🎨 Organização visual e responsividade
-
-A interface foi construída com componentes React reutilizáveis e classes utilitárias do Tailwind CSS, mantendo a identidade visual da Soulie consistente entre páginas, cards, botões, cabeçalho e rodapé.
-
-O layout se adapta a celulares, tablets e computadores. Em telas menores, o conteúdo é reorganizado verticalmente e o menu passa a funcionar no formato responsivo; em larguras intermediárias e maiores, os espaçamentos, imagens e elementos de navegação são ajustados para preservar a legibilidade e evitar cortes ou sobreposições.
-
-## 👥 Autores e créditos
-
-<table>
-  <thead>
-    <tr>
-      <th>Foto</th>
-      <th>Integrante</th>
-      <th>RM</th>
-      <th>Turma</th>
-      <th>LinkedIn</th>
-      <th>GitHub</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><img src="./my-app/src/assets/integrantes/foto_arthur.png" alt="Foto de Arthur Carvalho Brito Martins" width="60"></td>
-      <td>Arthur Carvalho Brito Martins</td>
-      <td>RM 572325</td>
-      <td>1TDSPH</td>
-      <td><a href="https://www.linkedin.com/in/arthur-martinss/">LinkedIn</a></td>
-      <td><a href="https://github.com/arthurmartinss">GitHub</a></td>
-    </tr>
-    <tr>
-      <td><img src="./my-app/src/assets/integrantes/foto_diego.jpeg" alt="Foto de Diego Soares Trujillo" width="60"></td>
-      <td>Diego Soares Trujillo</td>
-      <td>RM 570147</td>
-      <td>1TDSPH</td>
-      <td><a href="https://www.linkedin.com/in/diego-trujillo-3441b9380/">LinkedIn</a></td>
-      <td><a href="https://github.com/diegotrujillo011">GitHub</a></td>
-    </tr>
-    <tr>
-      <td><img src="./my-app/src/assets/integrantes/foto_enzo.jpeg" alt="Foto de Enzo Nukui da Silva" width="60"></td>
-      <td>Enzo Nukui da Silva</td>
-      <td>RM 569770</td>
-      <td>1TDSPH</td>
-      <td><a href="https://www.linkedin.com/in/enzo-nukui/">LinkedIn</a></td>
-      <td><a href="https://github.com/EnzoNukui">GitHub</a></td>
-    </tr>
-    <tr>
-      <td><img src="./my-app/src/assets/integrantes/foto_leticia_cardoso.jpeg" alt="Foto de Leticia Cardoso de Almeida" width="60"></td>
-      <td>Leticia Cardoso de Almeida</td>
-      <td>RM 569415</td>
-      <td>1TDSPH</td>
-      <td><a href="https://www.linkedin.com/in/let%C3%ADcia-almeida-70b851294/">LinkedIn</a></td>
-      <td><a href="https://github.com/lehalmeidafc0">GitHub</a></td>
-    </tr>
-    <tr>
-      <td><img src="./my-app/src/assets/integrantes/foto_leticia_dias.jpeg" alt="Foto de Leticia Dias Araujo Felix Moratori" width="60"></td>
-      <td>Leticia Dias Araujo Felix Moratori</td>
-      <td>RM 569138</td>
-      <td>1TDSPH</td>
-      <td><a href="https://www.linkedin.com/in/leticia-felix-660253286">LinkedIn</a></td>
-      <td><a href="https://github.com/LeticiaFelix18">GitHub</a></td>
-    </tr>
-  </tbody>
-</table>
-
-## 🚀 Como executar localmente
-
-### Pré-requisitos
-
-- Node.js instalado.
-- npm instalado.
-- Git instalado para clonar o repositório.
-
-### Instalação e execução
-
-1. Clone o repositório:
+É necessário ter Node.js e npm instalados. A API Java precisa estar acessível para usar as funções do aplicativo.
 
 ```bash
-git clone https://github.com/EnzoNukui/soulie-sprint3.git
-```
-
-2. Acesse a pasta da aplicação:
-
-```bash
-cd soulie-sprint3/my-app
-```
-
-3. Instale as dependências:
-
-```bash
-npm install
-```
-
-4. Inicie o ambiente de desenvolvimento:
-
-```bash
+git clone https://github.com/EnzoNukui/soulie-sprint4.git
+cd soulie-sprint4/my-app
+npm ci
+cp .env.example .env
 npm run dev
 ```
 
-5. Abra no navegador o endereço exibido pelo Vite no terminal.
+No arquivo `.env`, defina `VITE_API_URL=https://soulie-java.onrender.com`. Para que o formulário de contato envie mensagens, preencha também `VITE_EMAILJS_SERVICE_ID`, `VITE_EMAILJS_TEMPLATE_ID` e `VITE_EMAILJS_PUBLIC_KEY` com os valores da conta EmailJS do projeto. O arquivo `.env` é ignorado pelo Git e não deve ser incluído nos commits. Reinicie o servidor Vite após mudar essas variáveis.
 
-### Verificações disponíveis
+O endereço local aparecerá no terminal. Para conferir o projeto antes de publicar:
 
 ```bash
 npm run lint
@@ -277,26 +148,101 @@ npm run build
 npm run preview
 ```
 
-- `npm run lint` verifica a qualidade do código.
-- `npm run build` valida o TypeScript e gera a versão de produção.
-- `npm run preview` permite visualizar localmente a versão gerada.
+### Publicação na Vercel
 
-## 📬 Contato
+O diretório da aplicação é `my-app`. Na configuração do projeto na Vercel, use esse diretório como raiz, `npm run build` para compilar e `dist` como saída. Cadastre `VITE_API_URL` e, para habilitar o contato, as três variáveis `VITE_EMAILJS_...` em **Settings → Environment Variables**. Uma mudança nessas variáveis exige uma nova implantação. O arquivo `vercel.json` encaminha as rotas da SPA para `index.html`, permitindo abrir diretamente URLs como `/app/missoes`.
 
-- Envie dúvidas, sugestões ou feedbacks pelo [formulário de contato da Soulie](https://soulie-sprint3.vercel.app/contato).
-- Para assuntos relacionados ao código, utilize as [Issues do repositório](https://github.com/EnzoNukui/soulie-sprint3/issues).
-- Os perfis profissionais de todos os integrantes estão disponíveis na seção **Autores e créditos**.
+## Responsividade e acessibilidade
 
-## 📌 Status do projeto
+A interface mantém a identidade visual da Soulie entre páginas, cards, botões, cabeçalho e rodapé. As classes responsivas do Tailwind CSS reorganizam o conteúdo e ajustam espaçamentos, fontes e imagens em celular, tablet e desktop. O aplicativo mostra menu lateral em telas amplas e navegação inferior em telas menores.
 
-O front-end da **Sprint 03** está funcional e disponível na Vercel. A versão atual reúne as páginas obrigatórias, navegação SPA, rota dinâmica de integrantes, interações com estado, responsividade e formulário validado.
+Formulários têm rótulos, mensagens de validação e destaque visual de campos inválidos; menus e controles incluem estados de foco para navegação por teclado.
 
-Este é um projeto acadêmico em evolução. Nesta sprint não há consumo de API, conforme a orientação da atividade; integrações externas poderão ser desenvolvidas em etapas futuras.
+## Autores e créditos
 
-## 💜 Agradecimentos
+| Integrante | Foto | RM | Turma | LinkedIn | GitHub |
+| --- | --- | --- | --- | --- | --- |
+| Arthur Carvalho Brito Martins | <img src="./my-app/src/assets/integrantes/foto_arthur.png" alt="Arthur Carvalho Brito Martins" width="56"> | 572325 | 1TDSPH | [Perfil](https://www.linkedin.com/in/arthur-martinss/) | [arthurmartinss](https://github.com/arthurmartinss) |
+| Diego Soares Trujillo | <img src="./my-app/src/assets/integrantes/foto_diego.jpeg" alt="Diego Soares Trujillo" width="56"> | 570147 | 1TDSPH | [Perfil](https://www.linkedin.com/in/diego-trujillo-3441b9380/) | [diegotrujillo011](https://github.com/diegotrujillo011) |
+| Enzo Nukui da Silva | <img src="./my-app/src/assets/integrantes/foto_enzo.jpeg" alt="Enzo Nukui da Silva" width="56"> | 569770 | 1TDSPH | [Perfil](https://www.linkedin.com/in/enzo-nukui/) | [EnzoNukui](https://github.com/EnzoNukui) |
+| Leticia Cardoso de Almeida | <img src="./my-app/src/assets/integrantes/foto_leticia_cardoso.jpeg" alt="Leticia Cardoso de Almeida" width="56"> | 569415 | 1TDSPH | [Perfil](https://www.linkedin.com/in/let%C3%ADcia-almeida-70b851294/) | [lehalmeidafc0](https://github.com/lehalmeidafc0) |
+| Leticia Dias Araujo Felix Moratori | <img src="./my-app/src/assets/integrantes/foto_leticia_dias.jpeg" alt="Leticia Dias Araujo Felix Moratori" width="56"> | 569138 | 1TDSPH | [Perfil](https://www.linkedin.com/in/leticia-felix-660253286) | [LeticiaFelix18](https://github.com/LeticiaFelix18) |
 
-Agradecemos à **FIAP**, aos professores responsáveis pela orientação técnica e à **SoulUp** pela oportunidade de desenvolver uma solução voltada à sustentabilidade e ao engajamento. Também agradecemos a todas as pessoas que contribuíram com ideias, testes e feedbacks durante a evolução da Soulie.
+Projeto acadêmico desenvolvido para o **Challenge FIAP 2026**, em parceria com a **SoulUp**.
 
-## 📄 Licença
+## Imagens e ícones do projeto
 
-Este projeto foi desenvolvido exclusivamente para fins acadêmicos no **Challenge FIAP 2026**, em parceria com a **SoulUp**. O uso, a reprodução ou a adaptação do conteúdo deve preservar os créditos dos autores e respeitar as marcas e os materiais de seus respectivos titulares.
+A Soulie possui diferentes expressões para comunicar o estado da jornada. A aplicação também utiliza fotografias da equipe, imagens das comunidades, ícones da biblioteca Lucide React e uma animação em vídeo na Home.
+
+| Expressão | Imagem | Aplicação |
+| --- | --- | --- |
+| Feliz | <img src="./my-app/src/assets/avatar/expressoes/avatar_feliz.png" alt="Soulie feliz" width="60"> | Conclusão de missões |
+| Radiante | <img src="./my-app/src/assets/avatar/expressoes/avatar_radiante.png" alt="Soulie radiante" width="60"> | Marcos de progresso e recorrência |
+| Sorridente | <img src="./my-app/src/assets/avatar/expressoes/avatar_sorridente.png" alt="Soulie sorridente" width="60"> | Evolução positiva na jornada |
+| Bravo | <img src="./my-app/src/assets/avatar/expressoes/avatar_bravo.png" alt="Soulie brava" width="60"> | Interrupção de sequência ou alerta |
+| Triste | <img src="./my-app/src/assets/avatar/expressoes/avatar_triste.png" alt="Soulie triste" width="60"> | Longos períodos de inatividade |
+| Entediado | <img src="./my-app/src/assets/avatar/expressoes/avatar_entediado.png" alt="Soulie entediada" width="60"> | Inatividade moderada |
+| Tímido | <img src="./my-app/src/assets/avatar/expressoes/avatar_timido.png" alt="Soulie tímida" width="60"> | Onboarding e primeiras interações |
+| Com dúvida | <img src="./my-app/src/assets/avatar/expressoes/avatar_duvida.png" alt="Soulie com dúvida" width="60"> | Ajuda e orientação |
+| Com pressa | <img src="./my-app/src/assets/avatar/expressoes/avatar_com_pressa.png" alt="Soulie com pressa" width="60"> | Lembretes e urgência |
+
+### Páginas do site: antes e depois
+
+As comparações visuais produzidas na Sprint 3 continuam mostrando a evolução do site público. Na Sprint 4, essa base visual foi preservada e o projeto ganhou o aplicativo integrado à API Java e o envio real do formulário de contato.
+
+#### Home
+
+A página inicial apresenta a Soulie, os pilares da solução e as chamadas para conhecer o projeto.
+
+| Antes | Depois |
+| :---: | :---: |
+| <img src="./my-app/src/assets/produto/home-antigo.png" alt="Versão anterior da Home" width="100%"> | <img src="./my-app/src/assets/produto/home-novo.png" alt="Versão atual da Home" width="100%"> |
+
+#### Sobre
+
+A página Sobre apresenta a origem da Soulie, suas expressões e a trajetória de acompanhamento.
+
+| Antes | Depois |
+| :---: | :---: |
+| <img src="./my-app/src/assets/produto/sobre-antigo.png" alt="Versão anterior da página Sobre" width="100%"> | <img src="./my-app/src/assets/produto/sobre-novo.png" alt="Versão atual da página Sobre" width="100%"> |
+
+#### Solução
+
+A página Solução explica como missões, pontos, comunidades e recompensas transformam sustentabilidade em hábito.
+
+| Antes | Depois |
+| :---: | :---: |
+| <img src="./my-app/src/assets/produto/solucao-antigo.png" alt="Versão anterior da página Solução" width="100%"> | <img src="./my-app/src/assets/produto/solucao-novo.png" alt="Versão atual da página Solução" width="100%"> |
+
+#### Integrantes
+
+A página Integrantes apresenta a equipe e permite acessar perfis individuais pela rota com RM.
+
+| Antes | Depois |
+| :---: | :---: |
+| <img src="./my-app/src/assets/produto/integrantes-antigo.png" alt="Versão anterior da página Integrantes" width="100%"> | <img src="./my-app/src/assets/produto/integrantes-novo.png" alt="Versão atual da página Integrantes" width="100%"> |
+
+#### FAQ
+
+A página FAQ reúne as principais dúvidas em perguntas expansíveis.
+
+| Antes | Depois |
+| :---: | :---: |
+| <img src="./my-app/src/assets/produto/faq-antigo.png" alt="Versão anterior da página FAQ" width="100%"> | <img src="./my-app/src/assets/produto/faq-novo.png" alt="Versão atual da página FAQ" width="100%"> |
+
+#### Contato
+
+A página Contato oferece um formulário para dúvidas, problemas técnicos, sugestões e feedbacks. Na Sprint 4, o envio passou a chegar por e-mail à equipe.
+
+| Antes | Depois |
+| :---: | :---: |
+| <img src="./my-app/src/assets/produto/contato-antigo.png" alt="Versão anterior da página Contato" width="100%"> | <img src="./my-app/src/assets/produto/contato-novo.png" alt="Versão atual da página Contato" width="100%"> |
+
+## Contato
+
+Envie dúvidas, sugestões e relatos pelo [formulário de contato da Soulie](https://soulie-sprint4.vercel.app/contato). Para questões sobre o código, use as [Issues do repositório](https://github.com/EnzoNukui/soulie-sprint4/issues).
+
+
+## Licença
+
+Projeto desenvolvido para fins acadêmicos. O uso dos materiais deve preservar os créditos dos autores e respeitar as marcas da SoulUp e da FIAP.

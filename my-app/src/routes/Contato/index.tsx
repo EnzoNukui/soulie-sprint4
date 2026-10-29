@@ -2,13 +2,8 @@ import { useEffect, useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import Botao from "../../components/Botoes/Botoes";
 import Conteudo from "../../components/Conteudo/Conteudo";
-
-interface FormularioContato {
-  email: string;
-  assunto: string;
-  descricao: string;
-  tipoProblema: string;
-}
+import { contatoService } from "../../services/contatoService";
+import type { FormularioContato } from "../../types/contato";
 
 const campoBase =
   "w-full rounded-xl border bg-violet-50/40 px-4 py-3 text-violet-950 outline-none transition placeholder:text-zinc-400 focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-100";
@@ -19,6 +14,7 @@ export default function Contato() {
   }, []);
 
   const [mensagemEnviada, setMensagemEnviada] = useState(false);
+  const [erroEnvio, setErroEnvio] = useState("");
   const {
     register,
     handleSubmit,
@@ -26,9 +22,17 @@ export default function Contato() {
     formState: { errors, isSubmitting },
   } = useForm<FormularioContato>({ mode: "onBlur" });
 
-  const enviarFormulario: SubmitHandler<FormularioContato> = () => {
-    setMensagemEnviada(true);
-    reset();
+  const enviarFormulario: SubmitHandler<FormularioContato> = async (dados) => {
+    setMensagemEnviada(false);
+    setErroEnvio("");
+
+    try {
+      await contatoService.enviar(dados);
+      setMensagemEnviada(true);
+      reset();
+    } catch (erro) {
+      setErroEnvio(erro instanceof Error ? erro.message : "Não foi possível enviar sua mensagem. Tente novamente.");
+    }
   };
 
   return (
@@ -52,7 +56,10 @@ export default function Contato() {
           <form
             noValidate
             onSubmit={handleSubmit(enviarFormulario)}
-            onChange={() => setMensagemEnviada(false)}
+            onChange={() => {
+              setMensagemEnviada(false);
+              setErroEnvio("");
+            }}
             className="px-6 py-8 sm:px-9 sm:py-10 lg:px-10 lg:py-12"
             aria-label="Formulário de contato"
           >
@@ -70,6 +77,7 @@ export default function Contato() {
                   aria-describedby={errors.email ? "erro-email" : undefined}
                   className={`${campoBase} ${errors.email ? "border-red-500 focus:border-red-500 focus:ring-red-100" : "border-violet-200"}`}
                   {...register("email", {
+                    setValueAs: (valor: string) => valor.trim().toLowerCase(),
                     required: "Digite seu e-mail.",
                     pattern: {
                       value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
@@ -96,6 +104,7 @@ export default function Contato() {
                   aria-describedby={errors.assunto ? "erro-assunto" : undefined}
                   className={`${campoBase} ${errors.assunto ? "border-red-500 focus:border-red-500 focus:ring-red-100" : "border-violet-200"}`}
                   {...register("assunto", {
+                    setValueAs: (valor: string) => valor.trim(),
                     required: "Digite o assunto da mensagem.",
                     minLength: {
                       value: 5,
@@ -126,6 +135,7 @@ export default function Contato() {
                   aria-describedby={errors.descricao ? "erro-descricao" : undefined}
                   className={`${campoBase} resize-y ${errors.descricao ? "border-red-500 focus:border-red-500 focus:ring-red-100" : "border-violet-200"}`}
                   {...register("descricao", {
+                    setValueAs: (valor: string) => valor.trim(),
                     required: "Descreva como podemos ajudar.",
                     minLength: {
                       value: 20,
@@ -191,6 +201,12 @@ export default function Contato() {
               />
             </div>
 
+            {erroEnvio && (
+              <p role="alert" className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                {erroEnvio}
+              </p>
+            )}
+
             {mensagemEnviada && (
               <div
                 role="status"
@@ -206,7 +222,7 @@ export default function Contato() {
                 <div>
                   <p className="font-bold">Mensagem enviada com sucesso!</p>
                   <p className="mt-1 text-sm leading-6 text-emerald-800">
-                    Obrigado pelo contato. Sua mensagem foi validada e recebida nesta página.
+                    Sua mensagem foi encaminhada à equipe Soulie. Se necessário, responderemos pelo e-mail informado.
                   </p>
                 </div>
               </div>

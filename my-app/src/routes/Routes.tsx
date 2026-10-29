@@ -3,6 +3,7 @@ import App from "../App";
 import LayoutApp from "../components/LayoutApp/LayoutApp";
 import AppSoulie from "./App";
 import AcessoApp from "./AcessoApp";
+import CadastroApp from "./CadastroApp";
 import Comunidades from "./Comunidades";
 import ComunidadeDetalhe from "./ComunidadeDetalhe";
 import Contato from "./Contato";
@@ -53,6 +54,11 @@ const router = createBrowserRouter([
   {
     path: "/app/acesso",
     element: <AcessoApp />,
+    errorElement: <Error />,
+  },
+  {
+    path: "/app/cadastro",
+    element: <CadastroApp />,
     errorElement: <Error />,
   },
   {
