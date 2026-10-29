@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, ArrowRight, CalendarDays } from 'lucide-react'
+import { ArrowLeft, ArrowRight, CalendarDays, Users } from 'lucide-react'
 import { Link, useOutletContext, useParams } from 'react-router-dom'
 import avatarRadiante from '../../assets/avatar/expressoes/avatar_radiante.png'
 import avatarSorridente from '../../assets/avatar/expressoes/avatar_sorridente.png'
 import AcaoGuiadaSoulie from '../../components/AcaoGuiadaSoulie/AcaoGuiadaSoulie'
+import FormPublicacaoComunidade from '../../components/FormPublicacaoComunidade/FormPublicacaoComunidade'
 import EmptyState from '../../components/EmptyState/EmptyState'
 import ErrorState from '../../components/ErrorState/ErrorState'
 import LoadingState from '../../components/LoadingState/LoadingState'
@@ -64,6 +65,7 @@ export default function ComunidadeDetalhe() {
   const idValido = Number.isSafeInteger(idComunidade) && idComunidade > 0
   const [comunidade, setComunidade] = useState<Estado<Comunidade>>({ status: 'loading' })
   const [participacao, setParticipacao] = useState<Estado<UsuarioComunidade | null>>({ status: 'loading' })
+  const [quantidadeMembros, setQuantidadeMembros] = useState<Estado<number>>({ status: 'loading' })
   const [idParticipacaoCarregada, setIdParticipacaoCarregada] = useState<number | null>(null)
   const [publicacoes, setPublicacoes] = useState<Estado<Postagem[]>>({ status: 'loading' })
   const [autores, setAutores] = useState<Record<number, string>>({})
@@ -139,6 +141,28 @@ export default function ComunidadeDetalhe() {
   useEffect(() => {
     if (!idValido) return
     const controller = new AbortController()
+
+    async function carregarQuantidadeMembros() {
+      try {
+        const participantes = await comunidadeService.listarParticipantes(idComunidade, controller.signal)
+        if (!controller.signal.aborted) setQuantidadeMembros({ status: 'success', data: participantes.length })
+      } catch (erro) {
+        if (controller.signal.aborted) return
+        if (erro instanceof ApiError && erro.status === 404) {
+          setQuantidadeMembros({ status: 'success', data: 0 })
+          return
+        }
+        setQuantidadeMembros({ status: 'error', message: mensagemErro(erro, 'Não foi possível carregar a quantidade de membros.') })
+      }
+    }
+
+    void carregarQuantidadeMembros()
+    return () => controller.abort()
+  }, [idComunidade, idValido, tentativa])
+
+  useEffect(() => {
+    if (!idValido) return
+    const controller = new AbortController()
     async function carregarPublicacoes() {
       try {
         let lista: Postagem[]
@@ -151,7 +175,15 @@ export default function ComunidadeDetalhe() {
         }
         if (controller.signal.aborted) return
         const recentes = [...lista].sort((a, b) => Date.parse(b.dataPostagem) - Date.parse(a.dataPostagem))
-        setPublicacoes({ status: 'success', data: recentes })
+        setPublicacoes((atuais) => {
+          const publicacoesLocais = atuais.status === 'success'
+            ? atuais.data.filter((atual) => !recentes.some((recente) => recente.idPostagem === atual.idPostagem))
+            : []
+          return {
+            status: 'success',
+            data: [...publicacoesLocais, ...recentes].sort((a, b) => Date.parse(b.dataPostagem) - Date.parse(a.dataPostagem)),
+          }
+        })
         const idsAutores = [...new Set(recentes.map((item) => item.idUsuario))]
         const respostas = await Promise.allSettled(idsAutores.map((idUsuario) => usuarioService.buscarPorId(idUsuario, controller.signal)))
         if (controller.signal.aborted) return
@@ -178,6 +210,7 @@ export default function ComunidadeDetalhe() {
       if (participacao.data) {
         await comunidadeService.sair(usuario.idUsuario, idComunidade)
         setParticipacao({ status: 'success', data: null })
+        setQuantidadeMembros((atual) => atual.status === 'success' ? { status: 'success', data: Math.max(0, atual.data - 1) } : atual)
       } else {
         const dadosParticipacao = {
           idUsuario: usuario.idUsuario,
@@ -188,6 +221,7 @@ export default function ComunidadeDetalhe() {
         const novaParticipacao = resposta ?? dadosParticipacao
         setParticipacao({ status: 'success', data: novaParticipacao })
         setIdParticipacaoCarregada(idComunidade)
+        setQuantidadeMembros((atual) => atual.status === 'success' ? { status: 'success', data: atual.data + 1 } : atual)
       }
     } catch (erro) {
       setErroAcao(mensagemErro(erro, 'Não foi possível atualizar sua participação. Tente novamente.'))
@@ -212,7 +246,7 @@ export default function ComunidadeDetalhe() {
       void alternarParticipacao()
       return
     }
-    document.getElementById('feed-comunidade')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    document.getElementById('nova-publicacao-comunidade')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }
 
   function tentarNovamente() {
@@ -253,6 +287,12 @@ export default function ComunidadeDetalhe() {
                 {estadoParticipacaoAtual.status === 'success' && estadoParticipacaoAtual.data && (
                   <p className="mt-3 inline-flex items-center gap-2 text-sm text-zinc-500"><CalendarDays aria-hidden="true" className="h-4 w-4" /> Participa desde {formatarData(estadoParticipacaoAtual.data.dataIngresso)}</p>
                 )}
+                <p className="mt-3 inline-flex items-center gap-2 text-sm text-zinc-500">
+                  <Users aria-hidden="true" className="h-4 w-4" />
+                  {quantidadeMembros.status === 'success'
+                    ? `${quantidadeMembros.data} ${quantidadeMembros.data === 1 ? 'membro' : 'membros'}`
+                    : quantidadeMembros.status === 'loading' ? 'Carregando membros...' : 'Quantidade de membros indisponível'}
+                </p>
               </div>
               {estadoParticipacaoAtual.status === 'success' ? (
                 <button type="button" onClick={() => void alternarParticipacao()} disabled={processando} className={estadoParticipacaoAtual.data
@@ -270,6 +310,22 @@ export default function ComunidadeDetalhe() {
           {erroAcao && <p role="alert" className="mt-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900">{erroAcao}</p>}
           {estadoParticipacaoAtual.status === 'error' && <p role="alert" className="mt-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">{estadoParticipacaoAtual.message}</p>}
 
+          {jaParticipa && (
+            <FormPublicacaoComunidade
+              idUsuario={usuario.idUsuario}
+              idComunidade={idComunidade}
+              nomeUsuario={usuario.nomeUsuario}
+              nomeComunidade={comunidade.data.nome}
+              aoPublicar={(novaPostagem) => {
+                setPublicacoes((atuais) => ({
+                  status: 'success',
+                  data: [novaPostagem, ...(atuais.status === 'success' ? atuais.data : [])],
+                }))
+                setAutores((atuais) => ({ ...atuais, [usuario.idUsuario]: usuario.nomeUsuario }))
+              }}
+            />
+          )}
+
           <section id="feed-comunidade" aria-labelledby="titulo-feed-comunidade" className="mt-8 scroll-mt-6">
             <div className="mb-4 flex items-end justify-between gap-4">
               <div>
@@ -281,7 +337,10 @@ export default function ComunidadeDetalhe() {
             {publicacoes.status === 'loading' && <LoadingState mensagem="Carregando publicações..." />}
             {publicacoes.status === 'error' && <ErrorState mensagem={publicacoes.message} tentarNovamente={tentarNovamente} />}
             {publicacoes.status === 'success' && publicacoes.data.length === 0 && (
-              <EmptyState titulo="Ainda não há publicações" mensagem="Quando alguém compartilhar uma ideia ou ação neste grupo, ela aparecerá aqui." />
+              <EmptyState
+                titulo="Ainda não há publicações"
+                mensagem={jaParticipa ? 'Compartilhe a primeira ideia ou ação desta comunidade.' : 'Participe da comunidade para compartilhar ideias e acompanhar as conversas do grupo.'}
+              />
             )}
             {publicacoes.status === 'success' && publicacoes.data.length > 0 && (
               <div className="space-y-3">
@@ -311,7 +370,7 @@ export default function ComunidadeDetalhe() {
             <AcaoGuiadaSoulie
               imagem={jaParticipa ? avatarRadiante : avatarSorridente}
               mensagem={mensagemSoulie}
-              rotuloAcao={jaParticipa ? 'Ver publicações' : 'Participar da comunidade'}
+              rotuloAcao={jaParticipa ? 'Criar publicação' : 'Participar da comunidade'}
               onAcao={executarAcaoSoulie}
               posicaoVertical="superior"
             />
