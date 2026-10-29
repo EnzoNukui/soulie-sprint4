@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useState } from 'react'
 import { Link, Navigate, Outlet, useLocation } from 'react-router-dom'
 import MenuApp from '../MenuApp/MenuApp'
+import TutorialSoulieProvider from '../TutorialSoulie/TutorialSoulieProvider'
 import { usuarioSessaoService } from '../../services/usuarioSessaoService'
 import type { Usuario } from '../../types/api'
 
@@ -58,11 +59,13 @@ export default function LayoutApp() {
   if (!usuario.data) return <Navigate to="/app/acesso" replace />
 
   return (
-    <div className="min-h-screen bg-[#fbfafc] text-zinc-900 lg:grid lg:grid-cols-[252px_minmax(0,1fr)]">
-      <MenuApp />
-      <div className="min-w-0 pb-20 lg:pb-0">
-        <Outlet context={usuario.data} />
+    <TutorialSoulieProvider key={pathname}>
+      <div className="min-h-screen bg-[#fbfafc] text-zinc-900 lg:grid lg:grid-cols-[252px_minmax(0,1fr)]">
+        <MenuApp />
+        <div className="min-w-0 pb-20 lg:pb-0">
+          <Outlet context={usuario.data} />
+        </div>
       </div>
-    </div>
+    </TutorialSoulieProvider>
   )
 }

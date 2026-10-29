@@ -3,7 +3,10 @@ import { ArrowRight, CalendarDays, Check, CircleCheck, Flame, Plus, Target, X } 
 import { useOutletContext } from 'react-router-dom'
 import avatarRadiante from '../../assets/avatar/expressoes/avatar_radiante.png'
 import avatarSorridente from '../../assets/avatar/expressoes/avatar_sorridente.png'
-import AcaoGuiadaSoulie from '../../components/AcaoGuiadaSoulie/AcaoGuiadaSoulie'
+import AcaoGuiadaSoulie, { type PassoGuiaSoulie } from '../../components/AcaoGuiadaSoulie/AcaoGuiadaSoulie'
+import { tutorialCriarMissao, tutorialDetalheMissao } from '../../components/TutorialSoulie/tutoriaisSoulie'
+import useTutorialSolicitado from '../../components/TutorialSoulie/useTutorialSolicitado'
+import { useTutorialSoulie, type TutorialSoulie } from '../../components/TutorialSoulie/TutorialSoulieContext'
 import EmptyState from '../../components/EmptyState/EmptyState'
 import ErrorState from '../../components/ErrorState/ErrorState'
 import LoadingState from '../../components/LoadingState/LoadingState'
@@ -50,6 +53,7 @@ function mensagemErro(erro: unknown, padrao: string) {
 }
 
 export default function MissoesApp() {
+  const { ativo: tutorialAtivo } = useTutorialSoulie()
   const usuario = useOutletContext<Usuario>()
   const [missoes, setMissoes] = useState<Missao[]>([])
   const [participacoes, setParticipacoes] = useState<UsuarioMissao[]>([])
@@ -153,12 +157,7 @@ export default function MissoesApp() {
     return true
   }), [filtro, missoes, participacoesPorMissao])
 
-  const missaoSugerida = missoes.find((missao) => participacoesPorMissao.get(missao.idMissao)?.status !== 'CONCLUIDA')
-  const mensagemSoulie = missoesConcluidas > 0
-    ? 'Você já concluiu ' + missoesConcluidas + ' ' + (missoesConcluidas === 1 ? 'missão' : 'missões') + '. Que tal escolher o próximo desafio?'
-    : missoesEmAndamento > 0
-      ? 'Continue no seu ritmo. Suas missões em andamento estão aqui para você retomar.'
-      : 'Escolha uma missão que combine com você e comece com um pequeno passo.'
+  const missaoEmAndamento = missoes.find((missao) => participacoesPorMissao.get(missao.idMissao)?.status === 'EM_ANDAMENTO')
 
   async function entrarNaMissao(missao: Missao) {
     setEntrandoNaMissao(missao.idMissao)
@@ -298,19 +297,41 @@ export default function MissoesApp() {
     setTentativa((valor) => valor + 1)
   }
 
-  function executarSugestaoSoulie() {
-    if (missaoSugerida) {
-      setFiltro('todas')
-      abrirDetalhes(missaoSugerida.idMissao)
-      return
-    }
-    setAbrirCriacao(true)
-  }
+  const missaoDisponivel = missoes.find((missao) => !participacoesPorMissao.has(missao.idMissao))
+  const tutorialCriacao = tutorialCriarMissao(() => { setErroAcao(''); setAbrirCriacao(true) }, () => setAbrirCriacao(false))
+  const tutorialComeco = missaoDisponivel ? tutorialDetalheMissao(() => abrirDetalhes(missaoDisponivel.idMissao), false) : undefined
+  const tutorialRegistro = missaoEmAndamento ? tutorialDetalheMissao(() => abrirDetalhes(missaoEmAndamento.idMissao), true) : undefined
+  const tutorialFiltros: TutorialSoulie = { id: 'filtrar-missoes', titulo: 'Encontrar missões', etapas: [
+    { alvo: 'filtros-missoes', titulo: 'Escolha o que quer ver', descricao: 'Use Disponíveis para encontrar um novo desafio ou Em andamento para continuar uma missão.' },
+    { alvo: 'titulo-lista-missoes', titulo: 'Abra um desafio', descricao: 'Cada missão abaixo mostra a meta e os pontos. Abra os detalhes para saber como participar.' },
+  ] }
+  useTutorialSolicitado({ 'criar-missao': tutorialCriacao, 'registrar-acao': tutorialRegistro ?? tutorialComeco ?? tutorialCriacao }, !carregando && !erro)
+  const passosSoulie: PassoGuiaSoulie[] = erro ? [{
+    id: 'recarregar', titulo: 'Recarregar missões', descricao: 'A lista não carregou. Tente novamente.',
+    acao: 'Tentar novamente', icone: 'retomar', executar: tentarCarregarMissoesNovamente, destaque: true,
+  }] : [
+    {
+      id: 'criar', titulo: 'Criar uma missão', descricao: 'Nome, meta e pontos passo a passo.',
+      acao: 'Iniciar tutorial', icone: 'criar', tutorial: tutorialCriacao, destaque: true,
+    },
+    ...(tutorialComeco ? [{
+      id: 'comecar', titulo: 'Começar um desafio', descricao: 'Aprenda a entrar em uma missão.',
+      acao: 'Iniciar tutorial', icone: 'missao' as const, tutorial: tutorialComeco,
+    }] : []),
+    ...(tutorialRegistro ? [{
+      id: 'registrar', titulo: 'Registrar ação de hoje', descricao: 'Veja como atualizar seu progresso.',
+      acao: 'Iniciar tutorial', icone: 'retomar' as const, tutorial: tutorialRegistro,
+    }] : []),
+    ...(missoes.length ? [{
+      id: 'explorar', titulo: 'Encontrar missões', descricao: 'Entenda os filtros e os desafios.',
+      acao: 'Iniciar tutorial', icone: 'explorar' as const, tutorial: tutorialFiltros,
+    }] : []),
+  ]
 
   return (
     <main className="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-10">
       <header className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-        <div className="pr-20 lg:pr-0">
+        <div>
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-violet-700">Sua jornada</p>
           <h1 className="mt-2 text-3xl font-black tracking-tight text-zinc-950 sm:text-4xl">Missões</h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600 sm:text-base">
@@ -318,6 +339,7 @@ export default function MissoesApp() {
           </p>
         </div>
         <button
+          id="criar-missao"
           type="button"
           onClick={() => {
             setErroAcao('')
@@ -361,13 +383,13 @@ export default function MissoesApp() {
         </section>
       )}
 
-      <section aria-labelledby="titulo-lista-missoes" className="mt-8">
+      <section id="lista-missoes" aria-labelledby="titulo-lista-missoes" className="mt-8">
         <div className="flex flex-col gap-4 border-b border-zinc-200 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 id="titulo-lista-missoes" className="text-xl font-bold text-zinc-950">Encontre sua próxima missão</h2>
             <p className="mt-1 text-sm text-zinc-600">{missoes.length} {missoes.length === 1 ? 'missão cadastrada' : 'missões cadastradas'}</p>
           </div>
-          <div role="tablist" aria-label="Filtrar missões" className="-mb-px flex flex-wrap gap-x-5 gap-y-2 lg:pr-24">
+          <div id="filtros-missoes" role="tablist" aria-label="Filtrar missões" className="-mb-px flex flex-wrap gap-x-5 gap-y-2">
             {filtros.map((item) => (
               <button
                 key={item.id}
@@ -462,14 +484,14 @@ export default function MissoesApp() {
             if (event.target === event.currentTarget) fecharDetalhes()
           }}
         >
-          <section role="dialog" aria-modal="true" aria-labelledby="titulo-detalhe-missao" className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-3xl border border-violet-100 bg-white p-6 shadow-2xl sm:p-8">
+          <section role="dialog" aria-modal={!tutorialAtivo} aria-labelledby="titulo-detalhe-missao" className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-3xl border border-violet-100 bg-white p-6 shadow-2xl sm:p-8">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-violet-700">Detalhes da missão</p>
                 {detalhe.status === 'success' && <h2 id="titulo-detalhe-missao" className="mt-2 text-2xl font-black text-zinc-950">{detalhe.data?.nome}</h2>}
                 {detalhe.status !== 'success' && <h2 id="titulo-detalhe-missao" className="sr-only">Detalhes da missão selecionada</h2>}
               </div>
-              <button type="button" onClick={fecharDetalhes} aria-label="Fechar detalhes" className="rounded-lg p-2 text-zinc-500 transition hover:bg-violet-50 hover:text-violet-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
+              <button autoFocus type="button" onClick={fecharDetalhes} aria-label="Fechar detalhes" className="rounded-lg p-2 text-zinc-500 transition hover:bg-violet-50 hover:text-violet-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600">
                 <X aria-hidden="true" className="h-5 w-5" />
               </button>
             </div>
@@ -478,15 +500,17 @@ export default function MissoesApp() {
             {detalhe.status === 'error' && <div className="mt-5"><ErrorState mensagem={detalhe.message ?? 'Não foi possível carregar os detalhes.'} tentarNovamente={() => { setDetalhe({ status: 'loading' }); setTentativaDetalhe((valor) => valor + 1) }} /></div>}
             {detalhe.status === 'success' && detalhe.data && (
               <>
-                <p className="mt-4 leading-7 text-zinc-600">{detalhe.data.descricao}</p>
-                <div className="mt-6 grid grid-cols-2 gap-3">
-                  <div className="rounded-2xl bg-violet-50 p-4">
-                    <p className="text-xs font-medium text-zinc-500">Meta</p>
-                    <p className="mt-1 font-bold text-violet-900">{detalhe.data.metaDias} {detalhe.data.metaDias === 1 ? 'dia' : 'dias'}</p>
-                  </div>
-                  <div className="rounded-2xl bg-violet-50 p-4">
-                    <p className="text-xs font-medium text-zinc-500">Recompensa</p>
-                    <p className="mt-1 font-bold text-violet-900">{detalhe.data.pontosRecompensa} pontos</p>
+                <div id="resumo-missao">
+                  <p className="mt-4 leading-7 text-zinc-600">{detalhe.data.descricao}</p>
+                  <div className="mt-6 grid grid-cols-2 gap-3">
+                    <div className="rounded-2xl bg-violet-50 p-4">
+                      <p className="text-xs font-medium text-zinc-500">Meta</p>
+                      <p className="mt-1 font-bold text-violet-900">{detalhe.data.metaDias} {detalhe.data.metaDias === 1 ? 'dia' : 'dias'}</p>
+                    </div>
+                    <div className="rounded-2xl bg-violet-50 p-4">
+                      <p className="text-xs font-medium text-zinc-500">Recompensa</p>
+                      <p className="mt-1 font-bold text-violet-900">{detalhe.data.pontosRecompensa} pontos</p>
+                    </div>
                   </div>
                 </div>
                 {participacoesPorMissao.has(detalhe.data.idMissao) && (
@@ -495,45 +519,47 @@ export default function MissoesApp() {
                     metaDias={detalhe.data.metaDias}
                   />
                 )}
-                {participacoesPorMissao.get(detalhe.data.idMissao)?.status === 'EM_ANDAMENTO' ? (
-                  <div className="mt-5 space-y-3">
-                    {diasAtividadePorMissao.get(detalhe.data.idMissao)?.has(dataAtualDeSaoPaulo()) ? (
-                      <p role="status" className="rounded-xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
-                        Ação de hoje registrada. Você pode confirmar uma nova ação amanhã.
-                      </p>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => void confirmarAcaoDoDia(detalhe.data as Missao)}
-                        disabled={registrandoAtividade !== null}
-                        className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-violet-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-violet-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 disabled:cursor-wait disabled:opacity-60 sm:w-auto"
-                      >
-                        {registrandoAtividade === detalhe.data.idMissao ? 'Registrando...' : 'Confirmar ação de hoje'}
-                        <Check aria-hidden="true" className="h-4 w-4" />
-                      </button>
-                    )}
-                    {avisoRegistro && <p role="status" className="text-sm font-medium text-emerald-800">{avisoRegistro}</p>}
-                    {streakAtualizada && (
-                      <p className="inline-flex items-center gap-2 rounded-xl bg-orange-50 px-4 py-3 text-sm font-semibold text-orange-800">
-                        <Flame aria-hidden="true" className="h-4 w-4" /> Streak atualizada: {streakAtualizada.diasConsecutivos} {streakAtualizada.diasConsecutivos === 1 ? 'dia' : 'dias'}
-                      </p>
-                    )}
-                    {erroRegistro && <p role="alert" className="text-sm font-medium text-rose-700">{erroRegistro}</p>}
-                  </div>
-                ) : participacoesPorMissao.get(detalhe.data.idMissao)?.status === 'CONCLUIDA' ? (
-                  <p className="mt-5 rounded-xl bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-700">
-                    Missão concluída. Parabéns pelo seu progresso!
-                  </p>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => void entrarNaMissao(detalhe.data as Missao)}
-                    disabled={entrandoNaMissao !== null}
-                    className="mt-6 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-violet-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-violet-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 disabled:opacity-60 sm:w-auto"
-                  >
-                    {entrandoNaMissao === detalhe.data.idMissao ? 'Iniciando...' : 'Começar missão'} <ArrowRight aria-hidden="true" className="h-4 w-4" />
-                  </button>
-                )}
+                <div id="acao-missao">
+                  {participacoesPorMissao.get(detalhe.data.idMissao)?.status === 'EM_ANDAMENTO' ? (
+                    <div className="mt-5 space-y-3">
+                      {diasAtividadePorMissao.get(detalhe.data.idMissao)?.has(dataAtualDeSaoPaulo()) ? (
+                        <p role="status" className="rounded-xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
+                          Ação de hoje registrada. Você pode confirmar uma nova ação amanhã.
+                        </p>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => void confirmarAcaoDoDia(detalhe.data as Missao)}
+                          disabled={registrandoAtividade !== null}
+                          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-violet-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-violet-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 disabled:cursor-wait disabled:opacity-60 sm:w-auto"
+                        >
+                          {registrandoAtividade === detalhe.data.idMissao ? 'Registrando...' : 'Confirmar ação de hoje'}
+                          <Check aria-hidden="true" className="h-4 w-4" />
+                        </button>
+                      )}
+                      {avisoRegistro && <p role="status" className="text-sm font-medium text-emerald-800">{avisoRegistro}</p>}
+                      {streakAtualizada && (
+                        <p className="inline-flex items-center gap-2 rounded-xl bg-orange-50 px-4 py-3 text-sm font-semibold text-orange-800">
+                          <Flame aria-hidden="true" className="h-4 w-4" /> Streak atualizada: {streakAtualizada.diasConsecutivos} {streakAtualizada.diasConsecutivos === 1 ? 'dia' : 'dias'}
+                        </p>
+                      )}
+                      {erroRegistro && <p role="alert" className="text-sm font-medium text-rose-700">{erroRegistro}</p>}
+                    </div>
+                  ) : participacoesPorMissao.get(detalhe.data.idMissao)?.status === 'CONCLUIDA' ? (
+                    <p className="mt-5 rounded-xl bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-700">
+                      Missão concluída. Parabéns pelo seu progresso!
+                    </p>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => void entrarNaMissao(detalhe.data as Missao)}
+                      disabled={entrandoNaMissao !== null}
+                      className="mt-6 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-violet-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-violet-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 disabled:opacity-60 sm:w-auto"
+                    >
+                      {entrandoNaMissao === detalhe.data.idMissao ? 'Iniciando...' : 'Começar missão'} <ArrowRight aria-hidden="true" className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
               </>
             )}
           </section>
@@ -544,7 +570,7 @@ export default function MissoesApp() {
         <div className="fixed inset-0 z-50 grid place-items-center bg-zinc-950/40 p-4" role="presentation" onMouseDown={(event) => {
           if (event.target === event.currentTarget && !criando) setAbrirCriacao(false)
         }}>
-          <section role="dialog" aria-modal="true" aria-labelledby="titulo-criar-missao" className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-3xl border border-violet-100 bg-white p-6 shadow-2xl sm:p-8">
+          <section role="dialog" aria-modal={!tutorialAtivo} aria-labelledby="titulo-criar-missao" className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-3xl border border-violet-100 bg-white p-6 shadow-2xl sm:p-8">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-violet-700">Compartilhe um desafio</p>
@@ -558,26 +584,26 @@ export default function MissoesApp() {
             <form onSubmit={(event) => void criarMissao(event)} className="mt-6 space-y-4">
               <label className="block text-sm font-semibold text-zinc-800">
                 Nome da missão
-                <input value={nome} onChange={(event) => setNome(event.target.value)} required maxLength={100} className="mt-2 h-11 w-full rounded-xl border border-zinc-300 px-3 font-normal outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-100" placeholder="Ex.: Leve sua própria garrafa" />
+                <input id="nome-missao" autoFocus value={nome} onChange={(event) => setNome(event.target.value)} required maxLength={100} className="mt-2 h-11 w-full rounded-xl border border-zinc-300 px-3 font-normal outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-100" placeholder="Ex.: Leve sua própria garrafa" />
               </label>
               <label className="block text-sm font-semibold text-zinc-800">
                 Descrição
-                <textarea value={descricao} onChange={(event) => setDescricao(event.target.value)} required maxLength={500} rows={3} className="mt-2 w-full resize-y rounded-xl border border-zinc-300 px-3 py-2.5 font-normal outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-100" placeholder="Explique o desafio para a comunidade" />
+                <textarea id="descricao-missao" value={descricao} onChange={(event) => setDescricao(event.target.value)} required maxLength={500} rows={3} className="mt-2 w-full resize-y rounded-xl border border-zinc-300 px-3 py-2.5 font-normal outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-100" placeholder="Explique o desafio para a comunidade" />
               </label>
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="block text-sm font-semibold text-zinc-800">
                   Meta em dias
-                  <input type="number" value={metaDias} onChange={(event) => setMetaDias(event.target.value)} required min="1" max="365" className="mt-2 h-11 w-full rounded-xl border border-zinc-300 px-3 font-normal outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-100" />
+                  <input id="meta-missao" type="number" value={metaDias} onChange={(event) => setMetaDias(event.target.value)} required min="1" max="365" className="mt-2 h-11 w-full rounded-xl border border-zinc-300 px-3 font-normal outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-100" />
                 </label>
                 <label className="block text-sm font-semibold text-zinc-800">
                   Pontos de recompensa
-                  <input type="number" value={pontos} onChange={(event) => setPontos(event.target.value)} required min="1" max="10000" className="mt-2 h-11 w-full rounded-xl border border-zinc-300 px-3 font-normal outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-100" />
+                  <input id="pontos-missao" type="number" value={pontos} onChange={(event) => setPontos(event.target.value)} required min="1" max="10000" className="mt-2 h-11 w-full rounded-xl border border-zinc-300 px-3 font-normal outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-100" />
                 </label>
               </div>
               {erroAcao && <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900">{erroAcao}</p>}
               <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
                 <button type="button" onClick={() => setAbrirCriacao(false)} disabled={criando} className="min-h-11 rounded-xl border border-zinc-300 px-5 py-2.5 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50 disabled:opacity-50">Cancelar</button>
-                <button type="submit" disabled={criando} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-violet-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 disabled:cursor-wait disabled:opacity-60">
+                <button id="salvar-missao" type="submit" disabled={criando} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-violet-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 disabled:cursor-wait disabled:opacity-60">
                   {criando ? 'Cadastrando...' : 'Cadastrar missão'} <Plus aria-hidden="true" className="h-4 w-4" />
                 </button>
               </div>
@@ -588,9 +614,9 @@ export default function MissoesApp() {
 
       <AcaoGuiadaSoulie
         imagem={missoesConcluidas > 0 ? avatarRadiante : avatarSorridente}
-        mensagem={mensagemSoulie}
-        rotuloAcao={missaoSugerida ? 'Ver sugestão' : 'Criar missão'}
-        onAcao={executarSugestaoSoulie}
+        titulo="Sobre missões"
+        passos={passosSoulie}
+        carregando={carregando}
       />
     </main>
   )
