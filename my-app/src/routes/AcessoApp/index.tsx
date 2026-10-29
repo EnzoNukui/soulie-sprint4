@@ -5,12 +5,17 @@ import souliePaz from '../../assets/avatar/integrantes/soulie-paz.png'
 import souliePositivo from '../../assets/avatar/integrantes/soulie-positivo.png'
 import { usuarioSessaoService } from '../../services/usuarioSessaoService'
 
+type ErrosCampos = Partial<Record<'nomeUsuario' | 'email', string>>
+
+const formatoEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 export default function AcessoApp() {
   const navigate = useNavigate()
   const [nomeUsuario, setNomeUsuario] = useState('')
   const [email, setEmail] = useState('')
   const [carregando, setCarregando] = useState(false)
   const [erro, setErro] = useState('')
+  const [errosCampos, setErrosCampos] = useState<ErrosCampos>({})
 
   useEffect(() => {
     document.title = 'Soulie | Acessar jornada'
@@ -20,11 +25,28 @@ export default function AcessoApp() {
 
   async function acessar(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setCarregando(true)
     setErro('')
 
+    const nomeNormalizado = nomeUsuario.trim()
+    const emailNormalizado = email.trim().toLowerCase()
+    const novosErros: ErrosCampos = {}
+
+    if (nomeNormalizado.length < 2) {
+      novosErros.nomeUsuario = 'Digite um nome com pelo menos 2 caracteres, além de espaços.'
+    }
+    if (!emailNormalizado) {
+      novosErros.email = 'Digite seu e-mail.'
+    } else if (!formatoEmail.test(emailNormalizado)) {
+      novosErros.email = 'Digite um e-mail válido.'
+    }
+
+    setErrosCampos(novosErros)
+    if (Object.keys(novosErros).length > 0) return
+
+    setCarregando(true)
+
     try {
-      await usuarioSessaoService.acessar(nomeUsuario.trim(), email.trim().toLowerCase())
+      await usuarioSessaoService.acessar(nomeNormalizado, emailNormalizado)
       navigate('/app', { replace: true })
     } catch (error) {
       setErro(error instanceof Error ? error.message : 'Não foi possível acessar sua jornada. Tente novamente.')
@@ -56,7 +78,7 @@ export default function AcessoApp() {
             </p>
           </div>
 
-          <form className="mt-8 space-y-5" onSubmit={acessar}>
+          <form className="mt-8 space-y-5" onSubmit={acessar} noValidate>
             <div>
               <label htmlFor="nomeUsuario" className="mb-2 block text-sm font-semibold text-zinc-800 sm:text-base">Nome</label>
               <input
@@ -67,10 +89,18 @@ export default function AcessoApp() {
                 minLength={2}
                 maxLength={120}
                 value={nomeUsuario}
-                onChange={(event) => setNomeUsuario(event.target.value)}
+                onChange={(event) => {
+                  setNomeUsuario(event.target.value)
+                  setErrosCampos((atuais) => ({ ...atuais, nomeUsuario: undefined }))
+                }}
+                aria-invalid={Boolean(errosCampos.nomeUsuario)}
+                aria-describedby={errosCampos.nomeUsuario ? 'erro-nome-usuario' : undefined}
                 placeholder="Seu nome"
                 className="h-14 w-full rounded-2xl border border-violet-200 bg-violet-50/20 px-5 text-base outline-none transition placeholder:text-zinc-500 focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
               />
+              {errosCampos.nomeUsuario && (
+                <p id="erro-nome-usuario" role="alert" className="mt-2 text-sm text-rose-700">{errosCampos.nomeUsuario}</p>
+              )}
             </div>
 
             <div>
@@ -83,10 +113,18 @@ export default function AcessoApp() {
                 required
                 maxLength={160}
                 value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                onChange={(event) => {
+                  setEmail(event.target.value)
+                  setErrosCampos((atuais) => ({ ...atuais, email: undefined }))
+                }}
+                aria-invalid={Boolean(errosCampos.email)}
+                aria-describedby={errosCampos.email ? 'erro-email-acesso' : undefined}
                 placeholder="seu@email.com"
                 className="h-14 w-full rounded-2xl border border-violet-200 bg-violet-50/20 px-5 text-base outline-none transition placeholder:text-zinc-500 focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
               />
+              {errosCampos.email && (
+                <p id="erro-email-acesso" role="alert" className="mt-2 text-sm text-rose-700">{errosCampos.email}</p>
+              )}
             </div>
 
             {erro && <p role="alert" className="rounded-xl bg-rose-50 px-4 py-3 text-sm leading-5 text-rose-800">{erro}</p>}
