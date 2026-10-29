@@ -60,6 +60,10 @@ function mensagemErro(erro: unknown, padrao: string) {
 
 export default function ComunidadeDetalhe() {
   const { id } = useParams()
+  return <DetalheComunidade key={id} id={id} />
+}
+
+function DetalheComunidade({ id }: { id?: string }) {
   const usuario = useOutletContext<Usuario>()
   const idComunidade = Number(id)
   const idValido = Number.isSafeInteger(idComunidade) && idComunidade > 0
