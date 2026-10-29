@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { ArrowUpRight, Compass, MessageCircle, Plus, RotateCcw, Search, Target, UsersRound, X } from 'lucide-react'
+import { useTutorialSoulie, type TutorialSoulie } from '../TutorialSoulie/TutorialSoulieContext'
 
 const icones = {
   missao: Target,
@@ -10,15 +11,19 @@ const icones = {
   retomar: RotateCcw,
 }
 
-export interface PassoGuiaSoulie {
+interface OpcaoGuiaSoulie {
   id: string
   titulo: string
   descricao: string
   acao: string
   icone: keyof typeof icones
-  executar: () => void
   destaque?: boolean
 }
+
+export type PassoGuiaSoulie = OpcaoGuiaSoulie & (
+  | { tutorial: TutorialSoulie; executar?: never }
+  | { executar: () => void; tutorial?: never }
+)
 
 interface AcaoGuiadaSoulieProps {
   imagem: string
@@ -28,6 +33,7 @@ interface AcaoGuiadaSoulieProps {
 }
 
 export default function AcaoGuiadaSoulie({ imagem, titulo, passos, carregando = false }: AcaoGuiadaSoulieProps) {
+  const { ativo, iniciarTutorial } = useTutorialSoulie()
   const [aberto, setAberto] = useState(false)
   const id = useId()
   const guiaRef = useRef<HTMLDivElement>(null)
@@ -65,6 +71,8 @@ export default function AcaoGuiadaSoulie({ imagem, titulo, passos, carregando = 
     botaoRef.current?.focus()
   }
 
+  if (ativo) return null
+
   return (
     <div ref={guiaRef} className="fixed bottom-24 right-4 z-40 sm:right-6 lg:bottom-7">
       {aberto && (
@@ -85,7 +93,7 @@ export default function AcaoGuiadaSoulie({ imagem, titulo, passos, carregando = 
             </button>
           </header>
 
-          <p id={id + '-descricao'} className="sr-only">Escolha uma ação para ir ao local correspondente.</p>
+          <p id={id + '-descricao'} className="sr-only">Escolha o que você quer aprender. A Soulie vai mostrar cada passo na tela.</p>
 
           {carregando ? (
             <div role="status" className="mt-3 px-1 py-4 text-sm text-zinc-500">
@@ -104,7 +112,11 @@ export default function AcaoGuiadaSoulie({ imagem, titulo, passos, carregando = 
                       title={passo.acao}
                       aria-labelledby={id + '-' + passo.id + '-titulo'}
                       aria-describedby={id + '-' + passo.id + '-descricao'}
-                      onClick={() => { setAberto(false); passo.executar() }}
+                      onClick={() => {
+                        setAberto(false)
+                        if (passo.tutorial) iniciarTutorial({ ...passo.tutorial, imagem })
+                        else passo.executar()
+                      }}
                       className={'group flex min-w-0 flex-1 items-center gap-2 rounded-2xl border px-3 py-3 text-left transition focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-violet-600 ' + (passo.destaque ? 'border-violet-100 bg-violet-50/80 hover:bg-violet-100/70' : 'border-zinc-100 bg-white hover:border-violet-100 hover:bg-zinc-50')}
                     >
                       <span className="min-w-0 flex-1">
@@ -126,6 +138,7 @@ export default function AcaoGuiadaSoulie({ imagem, titulo, passos, carregando = 
 
       <button
         ref={botaoRef}
+        data-soulie-launcher
         type="button"
         aria-label={aberto ? 'Fechar guia da Soulie' : 'Abrir guia da Soulie'}
         aria-expanded={aberto}

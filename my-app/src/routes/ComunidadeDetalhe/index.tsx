@@ -4,7 +4,9 @@ import { Link, useNavigate, useOutletContext, useParams } from 'react-router-dom
 import avatarRadiante from '../../assets/avatar/expressoes/avatar_radiante.png'
 import avatarSorridente from '../../assets/avatar/expressoes/avatar_sorridente.png'
 import AcaoGuiadaSoulie, { type PassoGuiaSoulie } from '../../components/AcaoGuiadaSoulie/AcaoGuiadaSoulie'
-import { guiarParaElemento } from '../../components/AcaoGuiadaSoulie/guiarParaElemento'
+import { tutorialParticipar, tutorialPublicar } from '../../components/TutorialSoulie/tutoriaisSoulie'
+import useTutorialSolicitado from '../../components/TutorialSoulie/useTutorialSolicitado'
+import type { TutorialSoulie } from '../../components/TutorialSoulie/TutorialSoulieContext'
 import FormPublicacaoComunidade from '../../components/FormPublicacaoComunidade/FormPublicacaoComunidade'
 import EmptyState from '../../components/EmptyState/EmptyState'
 import ErrorState from '../../components/ErrorState/ErrorState'
@@ -240,23 +242,28 @@ function DetalheComunidade({ id }: { id?: string }) {
     ? participacao
     : { status: 'loading' }
   const jaParticipa = estadoParticipacaoAtual.status === 'success' && Boolean(estadoParticipacaoAtual.data)
-  const temPublicacoes = publicacoes.status === 'success' && publicacoes.data.length > 0
+  const tutorialPublicacao = tutorialPublicar({ titulo: 'titulo-publicacao-comunidade', conteudo: 'conteudo-publicacao-comunidade', enviar: 'enviar-publicacao-comunidade' })
+  const tutorialEntrada = tutorialParticipar()
+  const tutorialLeitura: TutorialSoulie = { id: 'ler-publicacoes', titulo: 'Ler as conversas', etapas: [
+    { alvo: 'titulo-feed-comunidade', titulo: 'As novidades ficam aqui', descricao: 'As publicações aparecem da mais recente para a mais antiga. Cada uma mostra quem escreveu e quando foi enviada.' },
+  ] }
+  useTutorialSolicitado({ publicar: jaParticipa ? tutorialPublicacao : tutorialEntrada, 'participar-comunidade': jaParticipa ? tutorialPublicacao : tutorialEntrada }, comunidade.status === 'success' && estadoParticipacaoAtual.status === 'success')
   const passosSoulie: PassoGuiaSoulie[] = [
     {
       id: 'participar', titulo: jaParticipa ? 'Escrever publicação' : 'Participar do grupo',
-      descricao: jaParticipa ? 'Dê um título e compartilhe sua ideia.' : 'Veja onde tocar para entrar e publicar.',
-      acao: jaParticipa ? 'Ir para o formulário' : 'Mostrar onde participar', icone: jaParticipa ? 'publicacao' : 'comunidade',
-      executar: () => jaParticipa ? guiarParaElemento('nova-publicacao-comunidade', 'titulo-publicacao-comunidade') : guiarParaElemento('participar-comunidade'),
+      descricao: jaParticipa ? 'Aprenda a compartilhar sua ideia.' : 'Veja como entrar e começar a publicar.',
+      acao: 'Iniciar tutorial', icone: jaParticipa ? 'publicacao' : 'comunidade',
+      tutorial: jaParticipa ? tutorialPublicacao : tutorialEntrada,
       destaque: true,
     },
     {
       id: 'ler', titulo: 'Ver publicações',
-      descricao: temPublicacoes ? 'Leia as ideias mais recentes do grupo.' : 'As novas conversas vão aparecer aqui.',
-      acao: 'Mostrar publicações', icone: 'explorar', executar: () => guiarParaElemento('feed-comunidade', 'titulo-feed-comunidade'),
+      descricao: 'Entenda onde acompanhar as conversas.',
+      acao: 'Iniciar tutorial', icone: 'explorar', tutorial: tutorialLeitura,
     },
     {
       id: 'explorar', titulo: 'Explorar outros grupos', descricao: 'Volte à lista e encontre novos temas.',
-      acao: 'Explorar comunidades', icone: 'comunidade', executar: () => navigate('/app/comunidades'),
+      acao: 'Aprender a buscar', icone: 'comunidade', executar: () => navigate('/app/comunidades', { state: { tutorialSoulie: 'buscar-comunidade' } }),
     },
   ]
 
@@ -291,7 +298,7 @@ function DetalheComunidade({ id }: { id?: string }) {
               <span className="absolute bottom-4 left-4 rounded-full bg-white/95 px-4 py-2 text-sm font-semibold text-violet-800 shadow-sm">{comunidade.data.tema}</span>
             </div>
             <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-7">
-              <div>
+              <div id="sobre-comunidade">
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-violet-700">Comunidade Soulie</p>
                 <h1 className="mt-2 text-2xl font-black tracking-tight text-zinc-950 sm:text-3xl">{comunidade.data.nome}</h1>
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600">Um espaço para trocar ideias, compartilhar experiências e descobrir novas ações sobre {comunidade.data.tema.toLowerCase()}.</p>

@@ -99,6 +99,7 @@ export default function FormPublicacaoComunidade({
           {publicada && <p role="status" className="font-medium text-emerald-700">Publicação compartilhada com a comunidade.</p>}
         </div>
         <button
+          id="enviar-publicacao-comunidade"
           type="submit"
           disabled={publicando}
           className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-violet-700 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-violet-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-700 disabled:cursor-wait disabled:opacity-60"

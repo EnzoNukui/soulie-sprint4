@@ -13,12 +13,6 @@
 .soulie-guia-avatar { animation: soulie-flutuar 4s ease-in-out infinite; }
 .soulie-guia-trilha { animation: soulie-trilha-entrar 180ms ease-out; }
 
-[data-soulie-destaque] {
-  outline: 3px solid #8b5cf6;
-  outline-offset: 6px;
-  scroll-margin-block: 6rem;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .soulie-guia-avatar, .soulie-guia-trilha { animation: none; }
 }

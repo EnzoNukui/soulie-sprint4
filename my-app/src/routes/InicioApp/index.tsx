@@ -5,7 +5,7 @@ import avatarRadiante from '../../assets/avatar/expressoes/avatar_radiante.png'
 import avatarSorridente from '../../assets/avatar/expressoes/avatar_sorridente.png'
 import AcoesPublicacao from '../../components/AcoesPublicacao/AcoesPublicacao'
 import AcaoGuiadaSoulie, { type PassoGuiaSoulie } from '../../components/AcaoGuiadaSoulie/AcaoGuiadaSoulie'
-import { guiarParaElemento } from '../../components/AcaoGuiadaSoulie/guiarParaElemento'
+import { tutorialPublicar } from '../../components/TutorialSoulie/tutoriaisSoulie'
 import EmptyState from '../../components/EmptyState/EmptyState'
 import ErrorState from '../../components/ErrorState/ErrorState'
 import LoadingState from '../../components/LoadingState/LoadingState'
@@ -204,32 +204,31 @@ export default function InicioApp() {
     ? Math.round((participacoesConcluidas.length / participacoes.length) * 100)
     : 0
 
+  const tutorialPublicacao = tutorialPublicar({ titulo: 'titulo-publicacao', grupo: 'grupo-publicacao', conteudo: 'conteudo-publicacao', enviar: 'enviar-publicacao' })
+  const comunidadeParaComecar = comunidades[0]
   const passosSoulie: PassoGuiaSoulie[] = [
     {
-      id: 'missao',
-      titulo: participacoesAtivas.length ? 'Continuar missão' : 'Escolher missão',
-      descricao: participacoesAtivas.length ? 'Abra o desafio e confirme sua ação do dia.' : 'Veja a meta e comece um desafio.',
-      acao: 'Abrir missões',
-      icone: 'missao',
-      executar: () => navigate('/app/missoes'),
-      destaque: true,
+      id: 'comunidade', titulo: 'Criar uma comunidade', descricao: 'Aprenda a montar seu próprio grupo.',
+      acao: 'Iniciar tutorial', icone: 'comunidade', destaque: true,
+      executar: () => navigate('/app/comunidades', { state: { tutorialSoulie: 'criar-comunidade' } }),
     },
     {
-      id: 'comunidade',
-      titulo: minhasComunidades.length ? 'Ver meus grupos' : 'Encontrar um grupo',
-      descricao: minhasComunidades.length ? 'Leia as novidades das suas comunidades.' : 'Explore os temas e escolha um grupo.',
-      acao: 'Explorar grupos',
-      icone: 'comunidade',
-      executar: () => navigate('/app/comunidades'),
+      id: 'missao', titulo: 'Criar uma missão', descricao: 'Defina o desafio, a meta e os pontos.',
+      acao: 'Iniciar tutorial', icone: 'missao',
+      executar: () => navigate('/app/missoes', { state: { tutorialSoulie: 'criar-missao' } }),
     },
     {
-      id: 'publicacao',
-      titulo: 'Publicar uma ideia',
-      descricao: minhasComunidades.length ? 'Escolha o grupo e escreva sua mensagem.' : 'Entre em um grupo para começar a publicar.',
-      acao: minhasComunidades.length ? 'Ir para o formulário' : 'Encontrar um grupo',
-      icone: 'publicacao',
-      executar: minhasComunidades.length ? irParaPublicacao : () => navigate('/app/comunidades'),
+      id: 'publicacao', titulo: 'Publicar uma ideia',
+      descricao: minhasComunidades.length ? 'Veja como escrever para seu grupo.' : 'Aprenda a entrar em um grupo para publicar.',
+      acao: 'Iniciar tutorial', icone: 'publicacao',
+      ...(minhasComunidades.length ? { tutorial: tutorialPublicacao } : {
+        executar: () => navigate(comunidadeParaComecar ? '/app/comunidades/' + comunidadeParaComecar.idComunidade : '/app/comunidades', { state: { tutorialSoulie: comunidadeParaComecar ? 'participar-comunidade' : 'criar-comunidade' } }),
+      }),
     },
+    ...(participacoesAtivas.length ? [{
+      id: 'registrar', titulo: 'Registrar ação de hoje', descricao: 'Aprenda a confirmar seu progresso.', acao: 'Iniciar tutorial', icone: 'retomar' as const,
+      executar: () => navigate('/app/missoes', { state: { tutorialSoulie: 'registrar-acao' } }),
+    }] : []),
   ]
 
   function tentarNovamente() {
@@ -287,10 +286,6 @@ export default function InicioApp() {
     await postagemService.excluir(postagem.idPostagem)
     setPostagens((atuais) => atuais.filter((item) => item.idPostagem !== postagem.idPostagem))
     setAvisoAcaoPostagem('Sua publicação foi excluída.')
-  }
-
-  function irParaPublicacao() {
-    guiarParaElemento('nova-publicacao', 'titulo-publicacao')
   }
 
   if (carregando) {
@@ -357,7 +352,7 @@ export default function InicioApp() {
             </span>
             <div className="grid min-w-0 flex-1 gap-3 md:grid-cols-[minmax(0,1fr)_220px]">
               <input id="titulo-publicacao" aria-label="Título da publicação" value={titulo} onChange={(event) => setTitulo(event.target.value)} required maxLength={120} placeholder="Compartilhe uma conquista da sua jornada..." className="h-12 min-w-0 rounded-xl border border-zinc-200 px-4 text-sm outline-none transition placeholder:text-zinc-500 focus:border-violet-500 focus:ring-4 focus:ring-violet-100" />
-              <select aria-label="Comunidade da publicação" value={comunidadeSelecionada} onChange={(event) => setComunidadeSelecionada(event.target.value)} required disabled={!minhasComunidades.length} className="h-12 rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-700 outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-100 disabled:bg-zinc-50 disabled:text-zinc-400">
+              <select id="grupo-publicacao" aria-label="Comunidade da publicação" value={comunidadeSelecionada} onChange={(event) => setComunidadeSelecionada(event.target.value)} required disabled={!minhasComunidades.length} className="h-12 rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-700 outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-100 disabled:bg-zinc-50 disabled:text-zinc-400">
                 <option value="">{minhasComunidades.length ? 'Escolha uma comunidade' : 'Entre em uma comunidade para publicar'}</option>
                 {minhasComunidades.map((participacao) => {
                   const comunidade = comunidades.find((item) => item.idComunidade === participacao.idComunidade)
@@ -365,11 +360,11 @@ export default function InicioApp() {
                 })}
               </select>
             </div>
-            <button type="submit" disabled={publicando || !minhasComunidades.length} className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-violet-700 px-5 text-sm font-bold text-white transition hover:bg-violet-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-700 disabled:cursor-not-allowed disabled:opacity-50">
+            <button id="enviar-publicacao" type="submit" disabled={publicando || !minhasComunidades.length} className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-violet-700 px-5 text-sm font-bold text-white transition hover:bg-violet-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-700 disabled:cursor-not-allowed disabled:opacity-50">
               {publicando ? 'Publicando...' : 'Publicar'} <Send aria-hidden="true" className="h-4 w-4" />
             </button>
           </div>
-          <textarea aria-label="Conteúdo da publicação" value={conteudo} onChange={(event) => setConteudo(event.target.value)} required maxLength={1000} rows={2} placeholder="Conte um pouco mais sobre essa ação..." className="mt-3 min-h-20 w-full resize-y rounded-xl border border-zinc-200 px-4 py-3 text-sm outline-none transition placeholder:text-zinc-500 focus:border-violet-500 focus:ring-4 focus:ring-violet-100" />
+          <textarea id="conteudo-publicacao" aria-label="Conteúdo da publicação" value={conteudo} onChange={(event) => setConteudo(event.target.value)} required maxLength={1000} rows={2} placeholder="Conte um pouco mais sobre essa ação..." className="mt-3 min-h-20 w-full resize-y rounded-xl border border-zinc-200 px-4 py-3 text-sm outline-none transition placeholder:text-zinc-500 focus:border-violet-500 focus:ring-4 focus:ring-violet-100" />
           {erroPublicacao && <p role="alert" className="mt-3 text-sm font-medium text-rose-700">{erroPublicacao}</p>}
           {publicacaoConcluida && <p role="status" className="mt-3 text-sm font-medium text-emerald-700">Publicação compartilhada com a comunidade.</p>}
           {!minhasComunidades.length && !erroComunidades && <p className="mt-3 text-sm text-zinc-600">Para publicar, primeiro participe de uma comunidade. <Link to="/app/comunidades" className="font-bold text-violet-700 underline underline-offset-2">Encontrar comunidades</Link></p>}
@@ -422,7 +417,7 @@ export default function InicioApp() {
 
       <AcaoGuiadaSoulie
         imagem={participacoesConcluidas.length ? avatarRadiante : avatarSorridente}
-        titulo="Próximos passos"
+        titulo="O que quer aprender?"
         passos={passosSoulie}
       />
     </main>
