@@ -86,6 +86,12 @@ O cliente HTTP em `my-app/src/services/apiClient.ts` usa **fetch**, adiciona os 
 
 Também há operações de participação em missões e comunidades. O aplicativo apresenta estados de carregamento, erro e lista vazia, com opção de tentar novamente em consultas que falham. O **EmailJS atende apenas ao formulário de contato**; a integração avaliada com o backend e o banco de dados ocorre pela API Java.
 
+Para lidar com a inicialização lenta da API hospedada no Render, cada requisição tem um **tempo limite de 60 segundos**. Se a API não responder nesse prazo, a interface mostra uma mensagem amigável e o usuário pode tentar novamente.
+
+### Desempenho
+
+As páginas são carregadas **sob demanda** com a opção `lazy` do React Router: apenas a Home faz parte do pacote inicial, e as demais rotas são baixadas quando acessadas. Com isso, o JavaScript inicial caiu de cerca de 498 kB para 308 kB (antes da compressão).
+
 ## Tecnologias utilizadas
 
 | Tecnologia | Uso no projeto |
