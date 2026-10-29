@@ -90,10 +90,10 @@ export default function Comunidades() {
 
     async function carregarComunidades() {
       try {
-        const lista = await comunidadeService.listar(controller.signal)
-        if (controller.signal.aborted) return
-
-        const participacoes = await comunidadeService.listarDoUsuario(usuario.idUsuario, controller.signal)
+        const [lista, participacoes] = await Promise.all([
+          comunidadeService.listar(controller.signal),
+          comunidadeService.listarDoUsuario(usuario.idUsuario, controller.signal),
+        ])
         if (controller.signal.aborted) return
 
         setComunidades(lista)
@@ -117,18 +117,33 @@ export default function Comunidades() {
     const idsDaLista = comunidades.map((comunidade) => comunidade.idComunidade).sort((a, b) => a - b).join(',')
 
     async function carregarQuantidades() {
-      const resultados = await Promise.all(comunidades.map(async (comunidade) => {
-        try {
-          const participantes = await comunidadeService.listarParticipantes(comunidade.idComunidade, controller.signal)
-          return [comunidade.idComunidade, participantes.length] as const
-        } catch (erro) {
-          if (erro instanceof ApiError && erro.status === 404) return [comunidade.idComunidade, 0] as const
-          return null
+      for (let indice = 0; indice < comunidades.length; indice += 2) {
+        if (controller.signal.aborted) return
+
+        const lote = comunidades.slice(indice, indice + 2)
+        const resultados = await Promise.all(lote.map(async (comunidade) => {
+          try {
+            const participantes = await comunidadeService.listarParticipantes(comunidade.idComunidade, controller.signal)
+            return [comunidade.idComunidade, participantes.length] as const
+          } catch (erro) {
+            if (erro instanceof ApiError && erro.status === 404) return [comunidade.idComunidade, 0] as const
+            return null
+          }
+        }))
+        if (controller.signal.aborted) return
+
+        const atualizacoes = resultados.filter(
+          (resultado): resultado is readonly [number, number] => resultado !== null,
+        )
+        if (atualizacoes.length > 0) {
+          setQuantidadesMembros((quantidadesAtuais) => ({
+            ...quantidadesAtuais,
+            ...Object.fromEntries(atualizacoes),
+          }))
         }
-      }))
+      }
 
       if (controller.signal.aborted) return
-      setQuantidadesMembros(Object.fromEntries(resultados.filter((resultado): resultado is readonly [number, number] => resultado !== null)))
       setIdsComunidadesContadas(idsDaLista)
     }
 

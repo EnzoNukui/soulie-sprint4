@@ -84,24 +84,17 @@ export default function InicioApp() {
     const controller = new AbortController()
 
     async function carregarInicio() {
-      const [
-        resultadoStreak,
-        resultadoAvatar,
-        resultadoJornada,
-        resultadoComunidades,
-        resultadoMinhasComunidades,
-        resultadoFeed,
-      ] = await Promise.all([
-        executarConsulta(() => streakService.buscarPorUsuario(usuario.idUsuario, controller.signal)),
-        executarConsulta(() => avatarService.buscarPorUsuario(usuario.idUsuario, controller.signal)),
-        executarConsulta(() => missaoService.listarParticipacoesDoUsuario(usuario.idUsuario, controller.signal)),
-        executarConsulta(() => comunidadeService.listar(controller.signal)),
-        executarConsulta(() => comunidadeService.listarDoUsuario(usuario.idUsuario, controller.signal)),
-        executarConsulta(() => postagemService.listar(controller.signal)),
-      ])
-      if (controller.signal.aborted) return
+      setErroIndicadores('')
+      setErroJornada('')
+      setErroComunidades('')
+      setErroFeed('')
 
       const errosIndicadores: string[] = []
+      const [resultadoStreak, resultadoAvatar] = await Promise.all([
+        executarConsulta(() => streakService.buscarPorUsuario(usuario.idUsuario, controller.signal)),
+        executarConsulta(() => avatarService.buscarPorUsuario(usuario.idUsuario, controller.signal)),
+      ])
+      if (controller.signal.aborted) return
 
       if (resultadoStreak.status === 'fulfilled') setStreak(resultadoStreak.value)
       else if (ehNaoEncontrado(resultadoStreak.reason)) setStreak(null)
@@ -118,23 +111,9 @@ export default function InicioApp() {
       }
       setErroIndicadores(errosIndicadores.join(' '))
 
-      if (resultadoJornada.status === 'fulfilled') setParticipacoes(resultadoJornada.value)
-      else {
-        setParticipacoes([])
-        setErroJornada(textoDeErro(resultadoJornada.reason, 'Não foi possível carregar seu progresso.'))
-      }
-
-      if (resultadoComunidades.status === 'fulfilled') setComunidades(resultadoComunidades.value)
-      else {
-        setComunidades([])
-        setErroComunidades(textoDeErro(resultadoComunidades.reason, 'Não foi possível carregar as comunidades.'))
-      }
-
-      if (resultadoMinhasComunidades.status === 'fulfilled') setMinhasComunidades(resultadoMinhasComunidades.value)
-      else {
-        setMinhasComunidades([])
-        setErroComunidades(textoDeErro(resultadoMinhasComunidades.reason, 'Não foi possível carregar suas comunidades.'))
-      }
+      let idsAutores: number[] = []
+      const resultadoFeed = await executarConsulta(() => postagemService.listar(controller.signal))
+      if (controller.signal.aborted) return
 
       if (resultadoFeed.status === 'fulfilled') {
         const recentes = resultadoFeed.value
@@ -143,28 +122,63 @@ export default function InicioApp() {
           .slice(0, 12)
         setPostagens(recentes)
 
-        const idsAutores = [...new Set(recentes.map((postagem) => postagem.idUsuario))]
+        idsAutores = [...new Set(recentes.map((postagem) => postagem.idUsuario))]
           .filter((idUsuario) => idUsuario !== usuario.idUsuario)
         const autoresCarregados: Record<number, string> = { [usuario.idUsuario]: usuario.nomeUsuario }
         setAutores(autoresCarregados)
         setErroFeed('')
         setCarregando(false)
-
-        const autoresAtualizados = { ...autoresCarregados }
-        for (const idUsuario of idsAutores) {
-          const resultado = await executarConsulta(() =>
-            usuarioService.buscarPorId(idUsuario, controller.signal),
-          )
-          if (controller.signal.aborted) return
-          if (resultado.status === 'fulfilled') {
-            autoresAtualizados[idUsuario] = resultado.value.nomeUsuario
-            setAutores({ ...autoresAtualizados })
-          }
-        }
       } else {
         setPostagens([])
         setErroFeed(textoDeErro(resultadoFeed.reason, 'Não foi possível carregar as publicações.'))
         setCarregando(false)
+      }
+
+      const [resultadoJornada, resultadoComunidades] = await Promise.all([
+        executarConsulta(() => missaoService.listarParticipacoesDoUsuario(usuario.idUsuario, controller.signal)),
+        executarConsulta(() => comunidadeService.listar(controller.signal)),
+      ])
+      if (controller.signal.aborted) return
+
+      if (resultadoJornada.status === 'fulfilled') setParticipacoes(resultadoJornada.value)
+      else {
+        setParticipacoes([])
+        setErroJornada(textoDeErro(resultadoJornada.reason, 'Não foi possível carregar seu progresso.'))
+      }
+
+      let erroComunidades = ''
+      if (resultadoComunidades.status === 'fulfilled') setComunidades(resultadoComunidades.value)
+      else {
+        setComunidades([])
+        erroComunidades = textoDeErro(resultadoComunidades.reason, 'Não foi possível carregar as comunidades.')
+      }
+
+      const resultadoMinhasComunidades = await executarConsulta(() =>
+        comunidadeService.listarDoUsuario(usuario.idUsuario, controller.signal),
+      )
+      if (controller.signal.aborted) return
+
+      if (resultadoMinhasComunidades.status === 'fulfilled') setMinhasComunidades(resultadoMinhasComunidades.value)
+      else {
+        setMinhasComunidades([])
+        erroComunidades = textoDeErro(resultadoMinhasComunidades.reason, 'Não foi possível carregar suas comunidades.')
+      }
+      setErroComunidades(erroComunidades)
+
+      const autoresAtualizados: Record<number, string> = { [usuario.idUsuario]: usuario.nomeUsuario }
+      for (let indice = 0; indice < idsAutores.length; indice += 2) {
+        if (controller.signal.aborted) return
+        const lote = idsAutores.slice(indice, indice + 2)
+        const resultados = await Promise.all(lote.map(async (idUsuario) => [
+          idUsuario,
+          await executarConsulta(() => usuarioService.buscarPorId(idUsuario, controller.signal)),
+        ] as const))
+        if (controller.signal.aborted) return
+
+        for (const [idUsuario, resultado] of resultados) {
+          if (resultado.status === 'fulfilled') autoresAtualizados[idUsuario] = resultado.value.nomeUsuario
+        }
+        setAutores({ ...autoresAtualizados })
       }
     }
 
