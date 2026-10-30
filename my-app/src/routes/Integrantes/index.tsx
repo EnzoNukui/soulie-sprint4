@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
-import fotoArthur from "../../assets/integrantes/foto_arthur.png";
-import fotoDiego from "../../assets/integrantes/foto_diego.jpeg";
+import fotoArthur from "../../assets/integrantes/foto_arthur.jpeg";
+import fotoDiego from "../../assets/integrantes/foto_diego.jpg";
 import fotoEnzo from "../../assets/integrantes/foto_enzo.jpeg";
 import fotoLeticiaCardoso from "../../assets/integrantes/foto_leticia_cardoso.jpeg";
 import fotoLeticiaDias from "../../assets/integrantes/foto_leticia_dias.jpeg";
