@@ -169,8 +169,8 @@ Formulários têm rótulos, mensagens de validação e destaque visual de campos
 
 | Integrante | Foto | RM | Turma | LinkedIn | GitHub |
 | --- | --- | --- | --- | --- | --- |
-| Arthur Carvalho Brito Martins | <img src="./my-app/src/assets/integrantes/foto_arthur.png" alt="Arthur Carvalho Brito Martins" width="56"> | 572325 | 1TDSPH | [Perfil](https://www.linkedin.com/in/arthur-martinss/) | [arthurmartinss](https://github.com/arthurmartinss) |
-| Diego Soares Trujillo | <img src="./my-app/src/assets/integrantes/foto_diego.jpeg" alt="Diego Soares Trujillo" width="56"> | 570147 | 1TDSPH | [Perfil](https://www.linkedin.com/in/diego-trujillo-3441b9380/) | [diegotrujillo011](https://github.com/diegotrujillo011) |
+| Arthur Carvalho Brito Martins | <img src="./my-app/src/assets/integrantes/foto_arthur.jpeg" alt="Arthur Carvalho Brito Martins" width="56"> | 572325 | 1TDSPH | [Perfil](https://www.linkedin.com/in/arthur-martinss/) | [arthurmartinss](https://github.com/arthurmartinss) |
+| Diego Soares Trujillo | <img src="./my-app/src/assets/integrantes/foto_diego.jpg" alt="Diego Soares Trujillo" width="56"> | 570147 | 1TDSPH | [Perfil](https://www.linkedin.com/in/diego-trujillo-3441b9380/) | [diegotrujillo011](https://github.com/diegotrujillo011) |
 | Enzo Nukui da Silva | <img src="./my-app/src/assets/integrantes/foto_enzo.jpeg" alt="Enzo Nukui da Silva" width="56"> | 569770 | 1TDSPH | [Perfil](https://www.linkedin.com/in/enzo-nukui/) | [EnzoNukui](https://github.com/EnzoNukui) |
 | Leticia Cardoso de Almeida | <img src="./my-app/src/assets/integrantes/foto_leticia_cardoso.jpeg" alt="Leticia Cardoso de Almeida" width="56"> | 569415 | 1TDSPH | [Perfil](https://www.linkedin.com/in/let%C3%ADcia-almeida-70b851294/) | [lehalmeidafc0](https://github.com/lehalmeidafc0) |
 | Leticia Dias Araujo Felix Moratori | <img src="./my-app/src/assets/integrantes/foto_leticia_dias.jpeg" alt="Leticia Dias Araujo Felix Moratori" width="56"> | 569138 | 1TDSPH | [Perfil](https://www.linkedin.com/in/leticia-felix-660253286) | [LeticiaFelix18](https://github.com/LeticiaFelix18) |
@@ -192,6 +192,30 @@ A Soulie possui diferentes expressões para comunicar o estado da jornada. A apl
 | Tímido | <img src="./my-app/src/assets/avatar/expressoes/avatar_timido.png" alt="Soulie tímida" width="60"> | Onboarding e primeiras interações |
 | Com dúvida | <img src="./my-app/src/assets/avatar/expressoes/avatar_duvida.png" alt="Soulie com dúvida" width="60"> | Ajuda e orientação |
 | Com pressa | <img src="./my-app/src/assets/avatar/expressoes/avatar_com_pressa.png" alt="Soulie com pressa" width="60"> | Lembretes e urgência |
+
+### Telas do aplicativo
+
+<p align="center">
+  <img src="./my-app/src/assets/produto/tela_soulie.png" alt="Visão geral do aplicativo Soulie" width="100%">
+</p>
+
+#### Início
+
+<p align="center">
+  <img src="./my-app/src/assets/produto/inicio_soulie.png" alt="Tela de início do aplicativo Soulie" width="100%">
+</p>
+
+#### Missões
+
+<p align="center">
+  <img src="./my-app/src/assets/produto/missoes_soulie.png" alt="Tela de missões do aplicativo Soulie" width="100%">
+</p>
+
+#### Comunidades
+
+<p align="center">
+  <img src="./my-app/src/assets/produto/comunidades_soulie.png" alt="Tela de comunidades do aplicativo Soulie" width="100%">
+</p>
 
 ### Páginas do site: antes e depois
 
