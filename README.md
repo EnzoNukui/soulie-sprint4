@@ -281,27 +281,62 @@ A Soulie possui diferentes expressões para comunicar o estado da jornada. A apl
 
 ### Telas do aplicativo
 
-<p align="center">
-  <img src="./my-app/src/assets/produto/tela_soulie.png" alt="Visão geral do aplicativo Soulie" width="100%">
-</p>
+As telas abaixo mostram a jornada do usuário no aplicativo e as requisições feitas à API Java em cada uma delas.
 
-#### Início
-
-<p align="center">
-  <img src="./my-app/src/assets/produto/inicio_soulie.png" alt="Tela de início do aplicativo Soulie" width="100%">
-</p>
-
-#### Missões
-
-<p align="center">
-  <img src="./my-app/src/assets/produto/missoes_soulie.png" alt="Tela de missões do aplicativo Soulie" width="100%">
-</p>
-
-#### Comunidades
-
-<p align="center">
-  <img src="./my-app/src/assets/produto/comunidades_soulie.png" alt="Tela de comunidades do aplicativo Soulie" width="100%">
-</p>
+<table>
+  <tr>
+    <td width="55%">
+      <img src="./my-app/src/assets/produto/tela_soulie.png" alt="Tela de acesso do aplicativo Soulie" width="100%">
+    </td>
+    <td>
+      <h4>Acesso e cadastro</h4>
+      <p>Porta de entrada do aplicativo. O usuário entra com um e-mail já cadastrado ou cria uma nova jornada informando nome e e-mail. A jornada fica salva no navegador para as próximas visitas.</p>
+      <p><b>Requisições:</b><br>
+      <code>GET /usuarios</code> consulta o e-mail informado<br>
+      <code>POST /usuarios</code> cadastra um novo usuário</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="55%">
+      <img src="./my-app/src/assets/produto/inicio_soulie.png" alt="Tela de início do aplicativo Soulie" width="100%">
+    </td>
+    <td>
+      <h4>Início</h4>
+      <p>Resumo da jornada, com o progresso do usuário, as missões em andamento e a expressão atual da Soulie.</p>
+      <p><b>Requisições:</b><br>
+      <code>GET /missoes</code> lista as missões da jornada</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="55%">
+      <img src="./my-app/src/assets/produto/missoes_soulie.png" alt="Tela de missões do aplicativo Soulie" width="100%">
+    </td>
+    <td>
+      <h4>Missões</h4>
+      <p>Permite explorar e criar missões, ver os detalhes de cada uma, participar e registrar as ações do dia.</p>
+      <p><b>Requisições:</b><br>
+      <code>GET /missoes</code> lista as missões<br>
+      <code>GET /missoes/:id</code> mostra os detalhes<br>
+      <code>POST /atividades</code> registra uma ação</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="55%">
+      <img src="./my-app/src/assets/produto/comunidades_soulie.png" alt="Tela de comunidades do aplicativo Soulie" width="100%">
+    </td>
+    <td>
+      <h4>Comunidades</h4>
+      <p>Permite pesquisar, criar e participar de comunidades. Dentro de cada uma, o usuário publica, edita e exclui as próprias mensagens.</p>
+      <p><b>Requisições:</b><br>
+      <code>GET /comunidades</code> lista as comunidades<br>
+      <code>GET /comunidades/:id</code> mostra os detalhes<br>
+      <code>GET /postagens</code> carrega o feed<br>
+      <code>POST /postagens</code> cria uma publicação<br>
+      <code>PUT /postagens/:id</code> edita uma publicação<br>
+      <code>DELETE /postagens/:id</code> exclui uma publicação</p>
+    </td>
+  </tr>
+</table>
 
 ### Páginas do site: antes e depois
 
