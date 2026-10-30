@@ -114,7 +114,7 @@ As páginas são carregadas **sob demanda** com a opção `lazy` do React Router
 soulie-sprint4/
 ├── README.md
 └── my-app/
-    ├── .env.example            # nomes das variáveis de ambiente
+    ├── .env.example           # configuração pública para execução local
     ├── public/                 # arquivos estáticos
     ├── src/
     │   ├── assets/            # imagens, avatares e vídeo
@@ -135,19 +135,103 @@ soulie-sprint4/
 
 ### Executar localmente
 
-É necessário ter Node.js e npm instalados. A API Java precisa estar acessível para usar as funções do aplicativo.
+#### 1. Preparar o ambiente
+
+Instale **Node.js 22.12 ou superior**, com npm, e Git. A execução completa requer acesso à internet: o front-end local usa a API Java publicada e o EmailJS. Não é necessário iniciar o backend Java, instalar banco de dados ou executar um servidor de e-mail na máquina para avaliar esta entrega.
 
 ```bash
 git clone https://github.com/EnzoNukui/soulie-sprint4.git
 cd soulie-sprint4/my-app
 npm ci
+```
+
+#### 2. Configurar as integrações
+
+Dentro de `my-app`, copie o arquivo `.env.example` para `.env`. O exemplo já contém os valores públicos utilizados na configuração local do projeto.
+
+**Windows (PowerShell):**
+
+```powershell
+Copy-Item .env.example .env
+```
+
+**macOS / Linux:**
+
+```bash
 cp .env.example .env
+```
+
+O arquivo deve estar em **`my-app/.env`**, ao lado de `package.json`, com este conteúdo:
+
+```dotenv
+VITE_API_URL=https://soulie-java.onrender.com
+VITE_EMAILJS_SERVICE_ID=service_ug6sajw
+VITE_EMAILJS_TEMPLATE_ID=template_rzevy62
+VITE_EMAILJS_PUBLIC_KEY=P7NI7atAQqFubQyGt
+```
+
+| Variável | Finalidade |
+| --- | --- |
+| `VITE_API_URL` | URL base da API Java para usuários, missões, atividades, comunidades e publicações. Não acrescente `/missoes` ou outro recurso ao valor. |
+| `VITE_EMAILJS_SERVICE_ID` | Identifica o serviço de e-mail conectado à conta EmailJS do projeto. |
+| `VITE_EMAILJS_TEMPLATE_ID` | Identifica o modelo da mensagem de contato. |
+| `VITE_EMAILJS_PUBLIC_KEY` | Chave **pública** da conta EmailJS, enviada como `user_id` na requisição. |
+
+As quatro variáveis são configurações do navegador. O Vite incorpora variáveis `VITE_` ao front-end; por isso, este exemplo contém somente a **Public Key** e identificadores públicos. Não use Private Key, senha do Gmail ou credenciais do banco nessas variáveis. O arquivo `.env` continua ignorado pelo Git; o `.env.example` é versionado para permitir a reprodução da entrega. Veja a [documentação de variáveis do Vite](https://vite.dev/guide/env-and-mode).
+
+#### 3. Iniciar o front-end
+
+```bash
 npm run dev
 ```
 
-No arquivo `.env`, defina `VITE_API_URL=https://soulie-java.onrender.com`. Para que o formulário de contato envie mensagens, preencha também `VITE_EMAILJS_SERVICE_ID`, `VITE_EMAILJS_TEMPLATE_ID` e `VITE_EMAILJS_PUBLIC_KEY` com os valores da conta EmailJS do projeto. O arquivo `.env` é ignorado pelo Git e não deve ser incluído nos commits. Reinicie o servidor Vite após mudar essas variáveis.
+Abra o endereço mostrado no terminal, normalmente **http://localhost:5173**. Se a porta estiver ocupada, o Vite poderá usar outra. Após alterar o `.env`, encerre o servidor com `Ctrl+C` e execute `npm run dev` novamente.
 
-O endereço local aparecerá no terminal. Para conferir o projeto antes de publicar:
+As variáveis cadastradas na Vercel não são transferidas para quem clona o repositório: o arquivo `.env` local é necessário mesmo quando o site publicado já funciona.
+
+#### 4. Conferir as integrações localmente
+
+| Integração | Como conferir | Resultado esperado |
+| --- | --- | --- |
+| API Java | Abra `/app/cadastro`, crie uma jornada de avaliação e acesse Missões e Comunidades. Para apenas consultar a API, abra [GET /missoes](https://soulie-java.onrender.com/missoes). | Cadastro e consultas respondem pela API publicada. As ações de escrita feitas localmente também usam os dados reais dessa API. |
+| EmailJS | Abra `/contato`, preencha os campos com dados válidos e envie uma mensagem identificada como teste de avaliação. | A interface confirma o envio aceito pelo serviço; a equipe pode conferir o recebimento na caixa configurada no modelo. |
+
+O contato envia `POST https://api.emailjs.com/api/v1.0/email/send` diretamente do navegador, via `fetch`. Não há instalação adicional de SDK nem comando separado para iniciar essa integração. O destinatário fica definido no modelo do EmailJS, e o e-mail informado no formulário serve para resposta. A API Java cuida dos dados do aplicativo; a mensagem de contato segue pelo EmailJS. Referência: [API de envio do EmailJS](https://www.emailjs.com/docs/rest-api/send/).
+
+#### Configurar outra conta EmailJS, se necessário
+
+Para reproduzir a entrega com a conta do projeto, use os valores acima. Caso a equipe substitua a conta ou queira usar um destinatário próprio:
+
+1. No [painel do EmailJS](https://dashboard.emailjs.com/), conecte um provedor em **Email Services** e copie o **Service ID**.
+2. Em **Email Templates**, crie um modelo de contato e copie o **Template ID**. Defina **To Email** com o endereço da equipe, **From Name** como `Contato Soulie`, **From Email** com o endereço padrão do serviço, **Reply To** como `{{email}}` e **Subject** como `Contato Soulie: {{assunto}}`.
+3. Inclua no corpo as variáveis abaixo, com os nomes exatamente iguais aos enviados por `src/services/contatoService.ts`:
+
+   | Variável do modelo | Conteúdo recebido |
+   | --- | --- |
+   | `{{email}}` | E-mail para resposta |
+   | `{{assunto}}` | Assunto preenchido |
+   | `{{tipo_problema}}` | Categoria da mensagem |
+   | `{{descricao}}` | Texto da mensagem |
+
+4. Nas configurações da conta, copie a **Public Key** e atualize as três variáveis `VITE_EMAILJS_...` no `.env`. Reinicie o Vite.
+5. Se a conta utilizar uma lista de origens permitidas, inclua a origem local exibida no terminal (por exemplo, `http://localhost:5173`) e a origem publicada. O responsável pela conta deve conferir essa configuração no painel.
+
+Consulte as referências de [variáveis dos modelos](https://www.emailjs.com/docs/user-guide/dynamic-variables-templates/) e de [origens permitidas do EmailJS](https://www.emailjs.com/docs/faq/can-i-add-my-domain-to-allowlist/).
+
+#### Se algo não funcionar
+
+| Sintoma | O que conferir |
+| --- | --- |
+| Mensagem de URL da API não configurada | Verifique se `.env` está dentro de `my-app`, se `VITE_API_URL` foi preenchida e reinicie o Vite. |
+| API demora para responder | A instância publicada no Render pode levar um tempo para iniciar. Aguarde e tente novamente; o cliente cancela requisições após 60 segundos. |
+| Contato informa que o envio não está configurado | Confira as três variáveis `VITE_EMAILJS_...` e reinicie o Vite. |
+| EmailJS recusa o envio | O responsável pela conta deve verificar serviço conectado, modelo, Public Key, limite de envios e permissão da origem local no painel. |
+| Interface confirma envio, mas a mensagem não aparece na caixa | Confira o destinatário do modelo, o histórico do EmailJS e a pasta de spam. A confirmação da interface indica aceite pelo serviço. |
+| Navegador mostra erro de CORS na API Java | Confirme a URL base e informe à equipe da API a origem local utilizada, para conferir se está autorizada no serviço publicado. |
+
+#### Verificar a compilação
+
+Para conferir o projeto antes de publicar, execute dentro de `my-app`:
 
 ```bash
 npm run lint
@@ -155,9 +239,11 @@ npm run build
 npm run preview
 ```
 
+O preview serve a versão compilada, normalmente em **http://localhost:4173**. Se alterar variáveis depois da compilação, execute `npm run build` novamente antes de iniciar o preview. Se houver restrição de origens no EmailJS, essa origem também precisa estar permitida para testar o contato no preview.
+
 ### Publicação na Vercel
 
-O diretório da aplicação é `my-app`. Na configuração do projeto na Vercel, use esse diretório como raiz, `npm run build` para compilar e `dist` como saída. Cadastre `VITE_API_URL` e, para habilitar o contato, as três variáveis `VITE_EMAILJS_...` em **Settings → Environment Variables**. Uma mudança nessas variáveis exige uma nova implantação. O arquivo `vercel.json` encaminha as rotas da SPA para `index.html`, permitindo abrir diretamente URLs como `/app/missoes`.
+O diretório da aplicação é `my-app`. Na configuração do projeto na Vercel, use esse diretório como raiz, `npm run build` para compilar e `dist` como saída. Cadastre as **mesmas quatro variáveis** da configuração local em **Settings → Environment Variables**, nos ambientes em que o projeto será utilizado. Uma mudança nessas variáveis exige uma nova implantação. O arquivo `vercel.json` encaminha as rotas da SPA para `index.html`, permitindo abrir diretamente URLs como `/app/missoes`.
 
 ## Responsividade e acessibilidade
 
