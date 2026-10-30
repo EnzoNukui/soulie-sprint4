@@ -193,6 +193,30 @@ A Soulie possui diferentes expressões para comunicar o estado da jornada. A apl
 | Com dúvida | <img src="./my-app/src/assets/avatar/expressoes/avatar_duvida.png" alt="Soulie com dúvida" width="60"> | Ajuda e orientação |
 | Com pressa | <img src="./my-app/src/assets/avatar/expressoes/avatar_com_pressa.png" alt="Soulie com pressa" width="60"> | Lembretes e urgência |
 
+### Telas do aplicativo
+
+<p align="center">
+  <img src="./my-app/src/assets/produto/tela_soulie.png" alt="Visão geral do aplicativo Soulie" width="100%">
+</p>
+
+#### Início
+
+<p align="center">
+  <img src="./my-app/src/assets/produto/inicio_soulie.png" alt="Tela de início do aplicativo Soulie" width="100%">
+</p>
+
+#### Missões
+
+<p align="center">
+  <img src="./my-app/src/assets/produto/missoes_soulie.png" alt="Tela de missões do aplicativo Soulie" width="100%">
+</p>
+
+#### Comunidades
+
+<p align="center">
+  <img src="./my-app/src/assets/produto/comunidades_soulie.png" alt="Tela de comunidades do aplicativo Soulie" width="100%">
+</p>
+
 ### Páginas do site: antes e depois
 
 As comparações visuais produzidas na Sprint 3 continuam mostrando a evolução do site público. Na Sprint 4, essa base visual foi preservada e o projeto ganhou o aplicativo integrado à API Java e o envio real do formulário de contato.
