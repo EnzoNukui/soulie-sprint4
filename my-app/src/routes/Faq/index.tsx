@@ -45,7 +45,7 @@ export default function Faq() {
             Perguntas <span className="text-violet-600">frequentes</span>
           </h1>
           <p className="mt-5 text-base leading-7 text-zinc-600 sm:text-lg">
-            Encontre respostas sobre a Soulie e a SoulUp.
+            Encontre respostas para as principais dúvidas sobre a Soulie e a SoulUp.
           </p>
         </header>
 
