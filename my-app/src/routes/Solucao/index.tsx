@@ -169,7 +169,7 @@ export default function Solucao() {
               Sustentabilidade que vira hábito
             </p>
             <h1 className="mt-5 text-4xl font-black leading-[1.02] tracking-[-0.045em] text-violet-950 sm:text-6xl xl:text-7xl">
-              Pequenas escolhas. Um impacto que cresce com você.
+              Pequenas escolhas que resultam em grandes impactos.
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-base leading-7 text-zinc-600 sm:text-lg lg:mx-0">
               A Soulie transforma ações sustentáveis em missões simples, sociais e recompensadoras.

@@ -129,7 +129,7 @@ export default function Home() {
             </p>
 
             <h1 className="text-4xl font-bold tracking-tight text-zinc-950 sm:text-6xl lg:text-7xl">
-              Pequenas ações. Impacto que continua.
+              Pequenas ações. Impactos que continuam.
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-base leading-7 text-zinc-600 sm:text-lg lg:mx-0">
               A Soulie transforma hábitos sustentáveis em missões, progresso e recompensas.

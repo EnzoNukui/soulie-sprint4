@@ -170,7 +170,7 @@ export default function Sobre() {
           <div data-revelar className="translate-y-8 text-center opacity-0 transition-all duration-700">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-violet-600">Da ideia ao impacto</p>
             <h2 className="mt-4 text-4xl font-bold tracking-tight text-zinc-950 sm:text-6xl">Trajetória da Ideia</h2>
-            <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-zinc-600">Uma jornada que transformou intenção em identidade, propósito e presença.</p>
+            <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-zinc-600">Mais que uma trajetória, uma essência que se fortalece a cada passo.</p>
           </div>
 
           <div className="relative mt-20 md:hidden">
